@@ -44,8 +44,8 @@ const PLANS = {
   },
   pro: {
     label: 'Pro',
-    features: { resumeParse: true, aiTailoring: true, aiInterview: true, llmConfig: true, repo: false, exports: true },
-    limits: { resumeParse: 500, aiTailoring: 300, aiInterview: 300, llmConfig: 100, repo: 0, exports: 500 },
+    features: { resumeParse: true, aiTailoring: true, aiInterview: true, llmConfig: false, repo: false, exports: true },
+    limits: { resumeParse: 500, aiTailoring: 300, aiInterview: 300, llmConfig: 0, repo: 0, exports: 500 },
   },
   team: {
     label: 'Team',

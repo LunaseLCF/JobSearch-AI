@@ -53,7 +53,7 @@ function can(feature) {
 }
 
 function requiredPlanFor(feature) {
-  return feature === 'repo' ? 'Team' : 'Pro';
+  return feature === 'repo' || feature === 'llmConfig' ? 'Team' : 'Pro';
 }
 
 function showUpgradeNotice(feature) {
