@@ -1,0 +1,62 @@
+# Node
+node_modules/
+.yarn/
+.yarnrc.yml
+
+# Keep package-lock.json: Node hosts and Docker use it for reproducible installs.
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Generated Netlify proxy file. It is created by `npm run build:netlify`.
+public/_redirects
+
+# Local app data — machine-generated and personal. Never publish.
+data/*
+!data/salary_data.json
+
+# Account/session/secret data
+data/llm-config.json
+data/sessions.json
+data/users.json
+data/password_resets.json
+data/usage.json
+data/profile.json
+data/tracker.json
+data/seen_jobs.json
+data/applications.json
+data/search_queries.json
+data/search-queries.json
+data/reports.json
+data/custom_job_sites.json
+data/*.xlsx
+data/users/
+data/tmp/
+data/import/
+data/outbox/
+data/.Registered_Users.ref/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / local tooling
+.vscode/
+.idea/
+.taste-skill/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Python cache
+__pycache__/
+*.py[cod]

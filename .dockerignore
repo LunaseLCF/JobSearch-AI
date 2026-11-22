@@ -1,0 +1,32 @@
+.git
+.gitignore
+node_modules
+npm-debug.log*
+.env
+.env.*
+!.env.example
+
+# Never bake personal/app data into the image.
+data
+data/**
+public/_redirects
+
+# Local verification and temporary artifacts.
+data/tmp
+data/import
+*.log
+logs
+coverage
+.nyc_output
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+.taste-skill
+*.swp
+*.swo
+__pycache__
+*.py[cod]
+
+# Netlify build output is not needed by the Node backend.
+netlify.toml

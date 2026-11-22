@@ -1,0 +1,220 @@
+/* AI Job Search — canonical design tokens.
+   Single source of truth for the SPA dashboard and all standalone auth/admin pages.
+   Change a value here and every surface follows. */
+:root {
+  color-scheme: dark;
+  /* Surface + ink */
+  --bg: #050718;
+  --panel: #0b1029;
+  --panel-2: #111838;
+  --panel-3: #151d40;
+  --text: #eef3ff;
+  --muted: #98a5cf;
+  --faint: #6f7da8;
+
+  /* Brand — cyan / sky / mint. No violet, no lavender. */
+  --accent: #35e6ff;
+  --accent-2: #7cb8ff;
+  --accent-3: #6ff0d8;
+  --accent-ink: #04121b;
+  --accent-soft: rgba(53, 230, 255, .10);
+  --accent-line: rgba(53, 230, 255, .35);
+
+  /* Semantic */
+  --danger: #ff8098;
+  --danger-soft: rgba(255, 128, 152, .12);
+  --warning: #f7c66b;
+  --warning-soft: rgba(247, 198, 107, .12);
+  --success: #6ff0c0;
+  --success-soft: rgba(111, 240, 192, .12);
+  --info: #7cb8ff;
+  --neutral: #8f9dc8;
+
+  /* Lines + fills */
+  --stroke: rgba(150, 168, 255, .18);
+  --stroke-strong: rgba(150, 168, 255, .32);
+  --fill: rgba(255, 255, 255, .045);
+  --fill-hover: rgba(255, 255, 255, .08);
+  --scrim: rgba(3, 5, 18, .74);
+
+  /* Type */
+  --font: "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-31: 31px;
+  --fs-50: 50px;
+  --lh: 1.6;
+
+  /* Radius */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-shell: 28px;
+  --r-pill: 999px;
+
+  /* Space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-14: 56px;
+
+  /* Elevation + motion */
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, .28);
+  --shadow-float: 0 20px 60px rgba(0, 0, 0, .45);
+  --t-fast: .15s;
+  --t-med: .2s;
+  --t-slow: .3s;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-14);
+  line-height: var(--lh);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+button, input, select, textarea { font: inherit; }
+h1, h2, h3, h4 { line-height: 1.15; margin: 0; }
+
+/* One focus ring, everywhere. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+::selection { background: var(--accent-line); color: var(--text); }
+* { scrollbar-width: thin; scrollbar-color: var(--stroke-strong) transparent; }
+
+/* Skip link — first thing in every document. */
+.skip-link {
+  position: absolute;
+  left: var(--s-3);
+  top: -60px;
+  z-index: 10000;
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  text-decoration: none;
+  transition: top var(--t-fast) var(--ease);
+}
+.skip-link:focus { top: var(--s-3); }
+
+/* Brand mark — one mark, one colour set. */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  background: linear-gradient(145deg, rgba(53,230,255,.22), rgba(111,240,216,.20));
+  border: 1px solid var(--accent-line);
+  box-shadow: 0 0 24px rgba(53,230,255,.22), inset 0 0 12px rgba(255,255,255,.08);
+}
+.brand-mark svg { width: 24px; height: 24px; }
+
+/* Shared button system. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease), background var(--t-med) var(--ease);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.btn-primary {
+  background: linear-gradient(100deg, var(--accent), var(--accent-2) 52%, var(--accent-3));
+  color: var(--accent-ink);
+  box-shadow: 0 12px 28px rgba(83, 150, 255, .28);
+}
+.btn-primary:hover { box-shadow: 0 16px 36px rgba(83, 150, 255, .4); filter: brightness(1.05); }
+.btn-secondary { background: var(--fill); border-color: var(--stroke); color: var(--text); }
+.btn-secondary:hover { background: var(--fill-hover); }
+.btn-danger { background: var(--danger-soft); border-color: rgba(255,128,152,.4); color: var(--danger); }
+.btn-sm { min-height: 32px; padding: 4px 10px; font-size: var(--fs-12); }
+
+/* Shared field system. */
+.field-label { display: block; font-size: var(--fs-12); font-weight: 650; color: #c6d0ef; margin-bottom: var(--s-2); }
+.input-wrap { position: relative; margin-bottom: var(--s-5); }
+.input-wrap > svg {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: #7d8bbd; pointer-events: none;
+}
+.input-wrap input, .form-input, .form-select, .form-textarea {
+  width: 100%; min-height: 48px; padding: 0 14px;
+  border: 1px solid var(--stroke); border-radius: var(--r-md);
+  background: var(--fill); color: var(--text); font-size: var(--fs-14);
+  outline: none; transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+}
+.input-wrap input { padding-left: 44px; padding-right: 44px; }
+.input-wrap input::placeholder, .form-input::placeholder { color: var(--faint); }
+/* Native dropdown popups do not inherit the field colors on every browser. */
+.form-select option, .form-select optgroup { background: var(--panel); color: var(--text); }
+.form-select option:checked, .form-select option:hover { background: var(--accent-soft); color: var(--text); }
+.input-wrap input:focus, .form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 4px rgba(53,230,255,.10);
+}
+.form-textarea { min-height: 100px; padding-top: 12px; resize: vertical; }
+
+/* Shared surfaces. */
+.card, .chart-container {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--s-5);
+}
+.card-title, .chart-title { font-size: var(--fs-14); font-weight: 600; }
+
+/* Shared badges + alerts. */
+.badge { display: inline-block; padding: 3px 10px; border-radius: var(--r-pill); font-size: var(--fs-11); font-weight: 700; }
+.alert { padding: 12px 16px; border-radius: var(--r-md); font-size: var(--fs-14); margin-bottom: var(--s-3); border: 1px solid var(--stroke); }
+.alert-info { background: rgba(124,184,255,.10); color: var(--info); border-color: rgba(124,184,255,.30); }
+.alert-success { background: var(--success-soft); color: var(--success); border-color: rgba(111,240,192,.30); }
+.alert-warning { background: var(--warning-soft); color: var(--warning); border-color: rgba(247,198,107,.30); }
+.alert-danger { background: var(--danger-soft); color: var(--danger); border-color: rgba(255,128,152,.30); }
+
+/* Status colours — used by dashboard, tracked once. */
+.status-strong, .status-hired { --status: var(--success); }
+.status-good, .status-active, .status-offer { --status: var(--accent-3); }
+.status-moderate, .status-interview { --status: var(--warning); }
+.status-weak, .status-rejected { --status: var(--danger); }
+.status-poor, .status-drafted { --status: var(--neutral); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader {
+  display: inline-block; width: 20px; height: 20px;
+  border: 3px solid var(--stroke); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

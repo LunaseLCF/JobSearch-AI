@@ -1,0 +1,26 @@
+{
+  "name": "ai-job-search-web",
+  "version": "1.1.0",
+  "description": "AI-powered job search assistant with profile matching, salary lookup, and tracker",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "prod": "NODE_ENV=production node server/index.js",
+    "build:netlify": "node scripts/write-netlify-redirects.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": ["job", "search", "career", "application"],
+  "license": "MIT",
+  "engines-note": "Python required for PDF/DOCX resume parsing (extract_text.py)"
+}

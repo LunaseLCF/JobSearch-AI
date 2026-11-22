@@ -1,0 +1,205 @@
+{
+  "metadata": {
+    "source": "Public market benchmarks: PayScale 2026 role pages (Thailand, Malaysia, China), Michael Page Salary Guide 2026 (Malaysia, Vietnam), China NBS 2025 via CNR, Vietnam minimum wage 2026 via Trading Economics",
+    "index_baseline": 0,
+    "index_label": "Gross annual base salary (local currency - see category suffix)",
+    "baseline_description": "MARKET BENCHMARKS ONLY - these are role-level market figures, NOT company-specific salary data. THB = Thai baht, MYR = Malaysian ringgit, VND = Vietnamese dong, CNY = Chinese yuan. Values are gross annual base salary unless the category says otherwise. Because currencies differ, do not compare values across countries directly.",
+    "scope": [
+      "Thailand",
+      "Malaysia",
+      "Vietnam",
+      "China"
+    ],
+    "generated": "2026-11-18",
+    "sources": [
+      {
+        "label": "PayScale - Marketing Manager Salary in Thailand 2026",
+        "url": "https://www.payscale.com/research/TH/Job=Marketing_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Supply Chain Manager Salary in Thailand 2026",
+        "url": "https://www.payscale.com/research/TH/Job=Supply_Chain_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Business Development Manager Salary in Thailand 2026",
+        "url": "https://www.payscale.com/research/TH/Job=Business_Development_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Finance Manager Salary in Thailand 2026",
+        "url": "https://www.payscale.com/research/TH/Job=Finance_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Software Engineer Salary in Thailand 2026",
+        "url": "https://www.payscale.com/research/TH/Job=Software_Engineer/Salary"
+      },
+      {
+        "label": "PayScale - Marketing Manager Salary in Malaysia 2026",
+        "url": "https://www.payscale.com/research/MY/Job=Marketing_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Supply Chain Manager Salary in Malaysia 2026",
+        "url": "https://www.payscale.com/research/MY/Job=Supply_Chain_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Business Development Manager Salary in Malaysia 2026",
+        "url": "https://www.payscale.com/research/MY/Job=Business_Development_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Finance Manager Salary in Malaysia 2026",
+        "url": "https://www.payscale.com/research/MY/Job=Finance_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Software Engineer Salary in Malaysia 2026",
+        "url": "https://www.payscale.com/research/MY/Job=Software_Engineer/Salary"
+      },
+      {
+        "label": "Michael Page - Malaysia Salary Guide 2026 (median gross annual salary RM112,300)",
+        "url": "https://www.michaelpage.com.my/salary-guide"
+      },
+      {
+        "label": "Michael Page - Vietnam Salary Guide 2026 (median gross annual salary VND1,376,000,000 for professionals)",
+        "url": "https://www.michaelpage.com.vn/salary-guide"
+      },
+      {
+        "label": "Trading Economics - Vietnam minimum wages 2026 (VND5,310,000/month region I)",
+        "url": "https://tradingeconomics.com/vietnam/minimum-wages"
+      },
+      {
+        "label": "PayScale - Marketing Manager Salary in China 2026",
+        "url": "https://www.payscale.com/research/CN/Job=Marketing_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Supply Chain Manager Salary in China 2026",
+        "url": "https://www.payscale.com/research/CN/Job=Supply_Chain_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Finance Manager Salary in China 2026",
+        "url": "https://www.payscale.com/research/CN/Job=Finance_Manager/Salary"
+      },
+      {
+        "label": "PayScale - Software Engineer Salary in China 2026",
+        "url": "https://www.payscale.com/research/CN/Job=Software_Engineer/Salary"
+      },
+      {
+        "label": "China National Bureau of Statistics 2025 average annual wages, reported by CNR",
+        "url": "https://www.cnr.cn/newscenter/native/gd/kx/20260515/t20260515_527621481.shtml"
+      }
+    ]
+  },
+  "companies": [
+    {
+      "company": "Thailand Market Benchmark (PayScale 2026)",
+      "city": "Bangkok",
+      "categories": {
+        "marketing_manager_thb_per_year": {
+          "index": 819512,
+          "samples": 60,
+          "source": "PayScale 2026, last updated 2025-06-20"
+        },
+        "supply_chain_manager_thb_per_year": {
+          "index": 1454958,
+          "samples": 19,
+          "source": "PayScale 2026, last updated 2024-11-21"
+        },
+        "business_development_manager_thb_per_year": {
+          "index": 840000,
+          "samples": 41,
+          "source": "PayScale 2026, last updated 2026-07-11"
+        },
+        "finance_manager_thb_per_year": {
+          "index": 943330,
+          "samples": 15,
+          "source": "PayScale 2026, last updated 2024-09-18"
+        },
+        "software_engineer_thb_per_year": {
+          "index": 583264,
+          "samples": 57,
+          "source": "PayScale 2026, last updated 2026-07-20"
+        }
+      }
+    },
+    {
+      "company": "Malaysia Market Benchmark (PayScale & Michael Page 2026)",
+      "city": "Kuala Lumpur",
+      "categories": {
+        "professional_median_myr_per_year": {
+          "index": 112300,
+          "source": "Michael Page Malaysia Salary Guide 2026"
+        },
+        "marketing_manager_myr_per_year": {
+          "index": 86937,
+          "samples": 249,
+          "source": "PayScale 2026, last updated 2026-03-11"
+        },
+        "supply_chain_manager_myr_per_year": {
+          "index": 122213,
+          "samples": 72,
+          "source": "PayScale 2026, last updated 2025-05-08"
+        },
+        "business_development_manager_myr_per_year": {
+          "index": 86950,
+          "samples": 217,
+          "source": "PayScale 2026, last updated 2026-04-17"
+        },
+        "finance_manager_myr_per_year": {
+          "index": 104104,
+          "samples": 208,
+          "source": "PayScale 2026, last updated 2026-09-02"
+        },
+        "software_engineer_myr_per_year": {
+          "index": 51155,
+          "samples": 456,
+          "source": "PayScale 2026, last updated 2026-10-03"
+        }
+      }
+    },
+    {
+      "company": "Vietnam Market Benchmark (Michael Page 2026)",
+      "city": "Ho Chi Minh City",
+      "categories": {
+        "professional_median_vnd_per_year": {
+          "index": 1376000000,
+          "source": "Michael Page Vietnam Salary Guide 2026 - median gross annual salary, professionals"
+        },
+        "minimum_wage_region_1_vnd_per_year": {
+          "index": 63720000,
+          "source": "VND5,310,000/month x 12, region I (Ho Chi Minh City/Hanoi), 2026"
+        }
+      }
+    },
+    {
+      "company": "China Market Benchmark (PayScale 2026 & NBS 2025)",
+      "city": "Shanghai",
+      "categories": {
+        "urban_non_private_average_cny_per_year": {
+          "index": 129441,
+          "source": "China NBS 2025, via CNR 2026-05-15"
+        },
+        "urban_private_average_cny_per_year": {
+          "index": 71590,
+          "source": "China NBS 2025, via CNR 2026-05-15"
+        },
+        "marketing_manager_cny_per_year": {
+          "index": 120000,
+          "samples": 18,
+          "source": "PayScale 2026, last updated 2026-09-09"
+        },
+        "supply_chain_manager_cny_per_year": {
+          "index": 420000,
+          "samples": 9,
+          "source": "PayScale 2026, last updated 2024-02-18"
+        },
+        "finance_manager_cny_per_year": {
+          "index": 450000,
+          "samples": 9,
+          "source": "PayScale 2026, last updated 2026-05-28"
+        },
+        "software_engineer_cny_per_year": {
+          "index": 185804,
+          "samples": 25,
+          "source": "PayScale 2026, last updated 2026-07-15"
+        }
+      }
+    }
+  ]
+}
