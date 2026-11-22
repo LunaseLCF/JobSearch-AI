@@ -3630,7 +3630,7 @@ api['POST /api/admin/users'] = (req, res, body) => {
   if (!requireOwner(req, res)) return;
   const email = String(body?.email || '').trim().toLowerCase();
   const password = String(body?.password || '');
-  const level = String(body?.level || body?.plan || 'free').toLowerCase();
+  const level = String(body?.level || body?.plan || 'pro').toLowerCase();
   const status = String(body?.status || 'Active');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return sendJSON(res, 400, { error: 'A valid email is required' });
   if (password.length < 8) return sendJSON(res, 400, { error: 'Password must be at least 8 characters' });

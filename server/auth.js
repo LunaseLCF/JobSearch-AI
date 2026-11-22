@@ -339,7 +339,7 @@ function registerUser(body) {
   const users = readUsers();
   const id = 'user_' + crypto.randomBytes(6).toString('hex');
   users[id] = {
-    id, email, name: name || email.split('@')[0], plan: 'free',
+    id, email, name: name || email.split('@')[0], plan: 'pro',
     passwordHash: hashPassword(password), createdAt: nowIso(),
   };
   writeUsers(users);
