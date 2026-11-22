@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: careercompass-ai-backend
+    name: jobsearch-ai-backend
     runtime: docker
     branch: main
     plan: 1c-2g
@@ -20,6 +20,6 @@ services:
       - key: REPO_DIR
         sync: false
     disk:
-      name: careercompass-data
+      name: jobsearch-ai-data
       mountPath: /app/data
       sizeGB: 10
