@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: careercompass-ai-backend
+    runtime: docker
+    branch: main
+    plan: 1c-2g
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: CHROME_PATH
+        value: /usr/bin/chromium
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: APP_BASE_URL
+        sync: false
+      - key: REPO_DIR
+        sync: false
+    disk:
+      name: careercompass-data
+      mountPath: /app/data
+      sizeGB: 10
