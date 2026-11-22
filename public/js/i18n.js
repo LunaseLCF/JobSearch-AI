@@ -25,6 +25,7 @@ const I18N_DICT = {
     'Repo Browser': 'เบราว์เซอร์คลังโค้ด',
     'HTML Report': 'รายงาน HTML',
     'LLM Config': 'ตั้งค่า LLM',
+    'Admin': 'ผู้ดูแลระบบ',
     'Language': 'ภาษา',
 
     // Common
@@ -234,6 +235,7 @@ const I18N_DICT = {
     'Repo Browser': '仓库浏览',
     'HTML Report': 'HTML 报告',
     'LLM Config': '大模型配置',
+    'Admin': '管理员',
     'Language': '语言',
 
     // Common

@@ -73,6 +73,7 @@ const esc = escapeHtml;
 
 // ============ Navigation ============
 document.querySelectorAll('.nav-item').forEach(item => {
+  if (item.dataset.external === 'true') return;
   item.addEventListener('click', () => {
     const feature = PAGE_FEATURES[item.dataset.page];
     if (!can(feature)) {
@@ -86,6 +87,10 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
+function isOwner() {
+  return !!(currentUser && currentUser.plan === 'owner');
+}
+
 function applyAccessRules() {
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     const feature = PAGE_FEATURES[item.dataset.page];
@@ -93,6 +98,8 @@ function applyAccessRules() {
     item.classList.toggle('nav-locked', !allowed);
     item.title = allowed ? '' : `Requires ${requiredPlanFor(feature)} plan`;
   });
+  const adminNav = document.getElementById('admin-nav-item');
+  if (adminNav) adminNav.hidden = !isOwner();
 }
 
 function renderPage() {

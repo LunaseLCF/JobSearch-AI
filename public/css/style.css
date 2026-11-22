@@ -37,6 +37,7 @@ body {
   border-radius: 0;
   transition: background var(--t-fast), color var(--t-fast);
 }
+a.nav-item { text-decoration: none; }
 .nav-item:hover { background: var(--fill); color: var(--text); }
 .nav-item.active {
   background: rgba(53,230,255,.12); color: var(--accent);
