@@ -2,6 +2,7 @@
 
 AI-powered job application assistant with profile matching, salary lookup, and application tracking.
 
+sample page : https://jobsearch-ai-z1t8.onrender.com/login
 ## Features
 
 - **Job Search** — Fetch listings from RemoteOK, Arbeitnow, and custom site templates
