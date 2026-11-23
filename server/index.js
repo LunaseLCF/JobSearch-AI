@@ -3259,7 +3259,7 @@ const server = http.createServer((req, res) => {
 
   // Auth pages are served from the project root but called from the app origin.
   // Reflect the origin + allow credentials for auth routes so the session cookie is stored.
-  const needsCredentials = pathname.startsWith('/api/auth/') || pathname === '/api/forgot' || pathname.startsWith('/api/admin/');
+  const needsCredentials = pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/register') && !pathname.startsWith('/api/auth/login') && pathname !== '/api/forgot' && !pathname.startsWith('/api/reset-password');
   if (needsCredentials && req.headers.origin) {
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
