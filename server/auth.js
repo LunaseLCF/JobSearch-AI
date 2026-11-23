@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { AsyncLocalStorage } = require('async_hooks');
+const store = require('./store');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -93,12 +94,19 @@ function nowIso() {
 }
 
 function readJSON(file) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { return null; }
+  if (file === USERS_FILE) return store.readUsers();
+  if (file === SESSIONS_FILE) return store.readSessions();
+  if (file === USAGE_FILE) return store.readUsage();
+  if (file === RESETS_FILE) return store.readResets();
+  return store.readFile(file);
 }
 
 function writeJSON(file, data) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+  if (file === USERS_FILE) return store.writeUsers(data);
+  if (file === SESSIONS_FILE) return store.writeSessions(data);
+  if (file === USAGE_FILE) return store.writeUsage(data);
+  if (file === RESETS_FILE) return store.writeResets(data);
+  return store.writeFile(file, data);
 }
 
 function hashPassword(password, salt) {
@@ -142,12 +150,12 @@ function publicUser(user) {
 function initAuth() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(USER_DATA_ROOT, { recursive: true });
-  if (!fs.existsSync(SESSIONS_FILE)) writeJSON(SESSIONS_FILE, {});
-  if (!fs.existsSync(USAGE_FILE)) writeJSON(USAGE_FILE, {});
-  if (!fs.existsSync(RESETS_FILE)) writeJSON(RESETS_FILE, {});
+  store.initStore();
+  const migration = store.migrateLegacy();
+  if (migration.migrated) console.log('[db] migrated legacy JSON data:', migration.counts);
 
-  let users = readUsers();
-  let ownerId = 'owner';
+  const users = readUsers();
+  const ownerId = 'owner';
   if (!Object.keys(users).length) {
     const bootstrapPassword = process.env.BOOTSTRAP_PASSWORD || 'admin1234';
     users[ownerId] = {
@@ -159,16 +167,7 @@ function initAuth() {
       createdAt: nowIso(),
     };
     writeUsers(users);
-    const dir = initializeUserData(ownerId);
-    // Copy the existing single-user data into the owner account as a one-time migration.
-    Object.entries(BASE_FILES).forEach(([key, filename]) => {
-      const source = path.join(DATA_DIR, filename);
-      const target = path.join(dir, filename);
-      if (fs.existsSync(source) && !fs.existsSync(target)) {
-        try { fs.copyFileSync(source, target); } catch (e) { /* ignore and let defaults apply */ }
-      }
-      void key;
-    });
+    initializeUserData(ownerId);
   }
   return { ownerId };
 }

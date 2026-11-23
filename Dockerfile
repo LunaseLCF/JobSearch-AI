@@ -3,8 +3,13 @@ FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
+# better-sqlite3 downloads a prebuilt binary; keep build tools as a fallback.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
 COPY . .
 
@@ -22,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv /opt/venv \
-    && /opt/venv/bin/pip install --no-cache-dir pypdf python-docx PyMuPDF
+    && /opt/venv/bin/pip install --no-cache-dir pypdf python-docx PyMuPDF openpyxl
 
 ENV PATH="/opt/venv/bin:${PATH}"
 ENV NODE_ENV=production

@@ -5,6 +5,7 @@ const url = require('url');
 const os = require('os');
 const { execFileSync } = require('child_process');
 const auth = require('./auth');
+const store = require('./store');
 const { sendResetEmail, mailConfig } = require('./mailer');
 const { ownerId } = auth.initAuth();
 
@@ -30,8 +31,8 @@ const DATA_FILES = auth.DATA_FILES;
 
 // Initialize data files
 function initDataFile(file, defaultData) {
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify(defaultData, null, 2), 'utf-8');
+  if (store.readFile(file) == null) {
+    store.writeFile(file, defaultData);
   }
 }
 
@@ -68,15 +69,16 @@ initializeUserDataFiles(ownerId);
 
 // Utility functions
 function readJSON(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf-8'));
-  } catch (e) {
-    return null;
-  }
+  return store.readFile(file);
 }
 
 function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
+  store.writeFile(file, data);
+}
+
+function currentUserId() {
+  const ctx = auth.requestContext.getStore();
+  return ctx && ctx.userId ? ctx.userId : 'owner';
 }
 
 function sendJSON(res, status, data) {
@@ -680,32 +682,24 @@ const PROFILE_PHOTO_EXTS = {
   '.gif': 'image/gif', '.webp': 'image/webp',
 };
 
-function profilePhotoDir() {
-  return path.dirname(DATA_FILES.profile);
-}
-
 function profilePhotoMeta() {
-  try { return readJSON(path.join(profilePhotoDir(), 'profile-photo.json')); }
-  catch (e) { return null; }
+  return store.getPhotoMeta(currentUserId());
 }
 
-function removeProfilePhotos(dir) {
-  for (const ext of Object.keys(PROFILE_PHOTO_EXTS)) {
-    try { fs.unlinkSync(path.join(dir, 'profile-photo' + ext)); } catch (e) {}
-  }
-  try { fs.unlinkSync(path.join(dir, 'profile-photo.json')); } catch (e) {}
+function removeProfilePhotos() {
+  store.deletePhoto(currentUserId());
 }
 
 api['GET /api/profile-photo'] = (req, res) => {
   const meta = profilePhotoMeta();
   if (!meta || !PROFILE_PHOTO_EXTS[meta.ext]) { sendJSON(res, 404, { error: 'No profile photo' }); return; }
-  const file = path.join(profilePhotoDir(), 'profile-photo' + meta.ext);
-  if (!fs.existsSync(file)) { sendJSON(res, 404, { error: 'No profile photo' }); return; }
+  const photo = store.getPhoto(currentUserId());
+  if (!photo) { sendJSON(res, 404, { error: 'No profile photo' }); return; }
   res.writeHead(200, {
-    'Content-Type': PROFILE_PHOTO_EXTS[meta.ext],
+    'Content-Type': meta.mime || PROFILE_PHOTO_EXTS[meta.ext],
     'Cache-Control': 'no-store',
   });
-  res.end(fs.readFileSync(file));
+  res.end(photo);
 };
 
 api['POST /api/profile-photo'] = (req, res, body, params, query, rawBody) => {
@@ -726,17 +720,12 @@ api['POST /api/profile-photo'] = (req, res, body, params, query, rawBody) => {
     if (filePart.data.length > 5 * 1024 * 1024) {
       sendJSON(res, 400, { error: 'Image must be smaller than 5 MB' }); return;
     }
-    const dir = profilePhotoDir();
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    removeProfilePhotos(dir);
-    fs.writeFileSync(path.join(dir, 'profile-photo' + ext), filePart.data);
-    writeJSON(path.join(dir, 'profile-photo.json'), {
+    store.savePhoto(currentUserId(), {
       ext,
       mime: PROFILE_PHOTO_EXTS[ext],
       originalName: path.basename(filePart.filename),
-      size: filePart.data.length,
       uploadedAt: new Date().toISOString(),
-    });
+    }, filePart.data);
     sendJSON(res, 200, { ok: true, photoUrl: '/api/profile-photo?v=' + Date.now() });
   } catch (e) {
     sendJSON(res, 500, { error: 'Photo upload failed: ' + e.message });
@@ -744,7 +733,7 @@ api['POST /api/profile-photo'] = (req, res, body, params, query, rawBody) => {
 };
 
 api['DELETE /api/profile-photo'] = (req, res) => {
-  removeProfilePhotos(profilePhotoDir());
+  removeProfilePhotos();
   sendJSON(res, 200, { ok: true });
 };
 
@@ -802,12 +791,10 @@ api['POST /api/generate-cv-pdf'] = (req, res, body) => {
     const { tailoredProfile } = tailoredFor(body || {});
     let html = docPreview.renderCV(tailoredProfile, (body && body.company) || '', (body && body.role) || '');
     const photoMeta = profilePhotoMeta();
-    if (photoMeta && PROFILE_PHOTO_EXTS[photoMeta.ext]) {
-      const photoFile = path.join(profilePhotoDir(), 'profile-photo' + photoMeta.ext);
-      if (fs.existsSync(photoFile)) {
-        const dataUrl = `data:${photoMeta.mime};base64,${fs.readFileSync(photoFile).toString('base64')}`;
-        html = html.replace(/\/api\/profile-photo\?v=\d+/g, dataUrl);
-      }
+    const photoBytes = photoMeta && PROFILE_PHOTO_EXTS[photoMeta.ext] ? store.getPhoto(currentUserId()) : null;
+    if (photoBytes) {
+      const dataUrl = `data:${photoMeta.mime || PROFILE_PHOTO_EXTS[photoMeta.ext]};base64,${photoBytes.toString('base64')}`;
+      html = html.replace(/\/api\/profile-photo\?v=\d+/g, dataUrl);
     }
     // Use the platform temp directory so this works on read-only app filesystems too.
     const tmpDir = os.tmpdir();
@@ -3294,6 +3281,7 @@ const server = http.createServer((req, res) => {
     });
     res.end(JSON.stringify({
       ok: true,
+      database: store.ping() ? 'ok' : 'error',
       uptimeSeconds: Math.floor(process.uptime()),
       time: new Date().toISOString(),
     }));
@@ -3591,14 +3579,25 @@ function adminUserView(user) {
     registeredAt: user.createdAt || '',
   };
 }
-function refreshUserExcel() {
+function generateUsersWorkbook() {
+  const stamp = Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const payloadFile = path.join(os.tmpdir(), `users_payload_${stamp}.json`);
+  const outFile = path.join(os.tmpdir(), `users_${stamp}.xlsx`);
   try {
-    execFileSync('python', [path.join(ROOT, 'scripts', 'export_users_to_excel.py')], {
-      cwd: ROOT, stdio: 'ignore', timeout: 20000,
+    const users = Object.values(auth.readUsers()).map(adminUserView);
+    fs.writeFileSync(payloadFile, JSON.stringify({ users, plans: auth.PLANS }, null, 2), 'utf8');
+    execFileSync('python', [path.join(ROOT, 'scripts', 'export_users_db.py'), payloadFile, outFile], {
+      cwd: ROOT, stdio: 'pipe', timeout: 30000,
     });
-  } catch (e) {
-    console.warn('Excel registry export skipped:', e.message);
+    return fs.readFileSync(outFile);
+  } finally {
+    try { fs.unlinkSync(payloadFile); } catch (e) {}
+    try { fs.unlinkSync(outFile); } catch (e) {}
   }
+}
+
+function refreshUserExcel() {
+  // SQLite is the source of truth now; the workbook is generated on download.
 }
 const VALID_LEVELS = new Set(['free', 'pro', 'team', 'owner']);
 
@@ -3610,20 +3609,18 @@ api['GET /api/admin/users'] = (req, res) => {
 
 api['GET /api/admin/users.xlsx'] = (req, res) => {
   if (!requireOwner(req, res)) return;
-  const preferred = path.join(DATA_DIR, 'Registered_Users_With_Levels.xlsx');
-  const fallback = path.join(DATA_DIR, 'Registered_Users.xlsx');
-  const file = fs.existsSync(preferred) ? preferred : fallback;
-  if (!fs.existsSync(file)) {
-    return sendJSON(res, 404, { error: 'No user registry export is available yet' });
+  try {
+    const content = generateUsersWorkbook();
+    res.writeHead(200, {
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="Registered_Users.xlsx"',
+      'Content-Length': content.length,
+      'Cache-Control': 'no-store',
+    });
+    res.end(content);
+  } catch (e) {
+    sendJSON(res, 500, { error: 'Could not generate user export: ' + e.message });
   }
-  const content = fs.readFileSync(file);
-  res.writeHead(200, {
-    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'Content-Disposition': 'attachment; filename="Registered_Users.xlsx"',
-    'Content-Length': content.length,
-    'Cache-Control': 'no-store',
-  });
-  res.end(content);
 };
 
 api['POST /api/admin/users'] = (req, res, body) => {
@@ -3692,6 +3689,7 @@ api['DELETE /api/admin/users/:id'] = (req, res, body, params) => {
   }
   delete users[id];
   auth.writeUsers(users);
+  store.deleteUserData(id);
   refreshUserExcel();
   sendJSON(res, 200, { ok: true });
 };

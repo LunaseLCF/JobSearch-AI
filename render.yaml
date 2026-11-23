@@ -13,6 +13,8 @@ services:
         value: "3000"
       - key: CHROME_PATH
         value: /usr/bin/chromium
+      - key: DATABASE_PATH
+        value: /app/data/careercompass.sqlite
       - key: COOKIE_SECURE
         value: "true"
       - key: APP_BASE_URL

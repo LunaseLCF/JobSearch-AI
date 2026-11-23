@@ -17,6 +17,12 @@ public/_redirects
 data/*
 !data/salary_data.json
 
+# SQLite database (including WAL/SHM sidecars). Stored on the host persistent disk.
+data/*.sqlite
+data/*.sqlite-*
+data/*.db
+data/*.db-*
+
 # Account/session/secret data
 data/llm-config.json
 data/sessions.json

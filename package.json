@@ -12,7 +12,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "better-sqlite3": "^11.10.0"
+  },
   "devDependencies": {
     "nodemon": "^3.0.0"
   },
@@ -20,7 +22,12 @@
     "type": "git",
     "url": "https://github.com/laichienfang-eng/JobSearch-AI.git"
   },
-  "keywords": ["job", "search", "career", "application"],
+  "keywords": [
+    "job",
+    "search",
+    "career",
+    "application"
+  ],
   "license": "MIT",
   "engines-note": "Python required for PDF/DOCX resume parsing (extract_text.py)"
 }
