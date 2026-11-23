@@ -2676,18 +2676,34 @@ const CN_SCHOOL_RE = /(?:大学|学院|学校|研究院|校区|Polytechnic|Unive
 
 function splitCnParts(value) {
   const result = [];
-  const tokens = String(value || '')
-    .replace(CN_DATE_TOKEN_RE, ' ')
-    .split(/\s*[|｜]\s*|\s{2,}|[,，、]\s*/);
-  for (const token of tokens) {
-    // Chinese fields are often jammed together after PDF extraction:
-    // "腾讯科技产品经理", "北京大学计算机科学与技术本科".
-    const pieces = token.split(/(?<=大学|学院|学校|研究院|有限公司|集团|公司|银行|医院)(?=[\u4e00-\u9fff])|(?<=科技|中心)(?!有限|股份|责任|公司|集团)(?=[\u4e00-\u9fff])|(?=博士|硕士|本科|学士|大专|专科|学位)/);
-    for (const piece of pieces) {
-      const part = piece.trim().replace(/^[\s:：\-–—]+|[\s:：\-–—]+$/g, '');
-      if (part) result.push(part);
-    }
+
+  // Extract and store dates first
+  let startDate = '';
+  let endDate = '';
+  const dateMatch = String(value || '').match(/(\d{4})[\-～至](\d{4}|至今)/);
+  if (dateMatch) {
+    startDate = dateMatch[1];
+    endDate = dateMatch[2];
   }
+
+  // Remove all date-related content from the string
+  let core = value
+    .replace(/\d{4}[\-～至]\d{4}|至今/g, '')
+    .replace(/[（(][^)）]*[)）]/g, '')
+    .trim();
+
+  // Clean up symbols
+  core = core.replace(/[｜\-——～,，、\s]+/g, ' ').trim();
+
+  // Split by spaces
+  const tokens = core.split(/\s+/).filter(Boolean);
+
+  for (const token of tokens) {
+    const part = token.trim();
+    if (!part || part.length < 2) continue;
+    result.push(part);
+  }
+
   return result;
 }
 
