@@ -222,3 +222,41 @@ tr:hover { background: var(--fill); }
   .main-content { margin-left: 60px; padding: 16px; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* ---------- Admin modal form fields ---------- */
+.field-group {
+  margin-bottom: var(--s-4);
+}
+.field-group label {
+  display: block;
+  font-size: var(--fs-12);
+  font-weight: 650;
+  color: var(--text-secondary);
+  margin-bottom: var(--s-2);
+}
+.field-group input,
+.field-group select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--r-md);
+  background: var(--fill);
+  color: var(--text);
+  font-size: var(--fs-14);
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.field-group input:focus,
+.field-group select:focus {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px rgba(53,230,255,.1);
+}
+.field-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: var(--s-5);
+}
+.field-actions button {
+  flex: 1;
+}
