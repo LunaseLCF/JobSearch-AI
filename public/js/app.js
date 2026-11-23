@@ -49,8 +49,15 @@ const PAGE_FEATURES = {
   admin: 'owner',
 };
 
+// Pages that require no feature gate (accessible to all logged-in users)
+const PUBLIC_PAGES = new Set([
+  'dashboard', 'search', 'evaluate', 'tracker', 'salary', 'profile', 'queries'
+]);
+
 function can(feature) {
   if (feature === 'owner') return isOwner();
+  // If no feature required for this page, allow access
+  if (!feature) return true;
   return !!(entitlements && entitlements.features && entitlements.features[feature]);
 }
 
@@ -2880,7 +2887,7 @@ function renderAdminTable() {
       <td>${escapeHtml(user.registeredAt || '')}</td>
       <td><span class="badge ${status === 'Active' ? 'badge-applied' : 'badge-drafted'}">${status}</span></td>
       <td>
-        <button class="btn btn-secondary btn-sm" onclick="window.adminOpenModal(this)" data-id="${id}">${escapeHtml(tr('Edit'))}</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.adminOpenModal(users.find(u=>u.id==='${id}'))">${escapeHtml(tr('Edit'))}</button>
         <button class="btn btn-danger btn-sm" onclick="window.adminDelete(this)" data-id="${id}">${escapeHtml(tr('Delete'))}</button>
       </td>
     </tr>`;
