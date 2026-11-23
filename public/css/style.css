@@ -205,6 +205,12 @@ tr:hover { background: var(--fill); }
 .auth-subtitle { margin: 0 0 20px; color: var(--muted); font-size: var(--fs-13); }
 .auth-switch { margin: 16px 0 0; text-align: center; font-size: var(--fs-13); }
 
+/* ---------- Admin panel layout ---------- */
+.admin-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.admin-panel-meta { font-size: var(--fs-13); color: var(--muted); }
+.admin-panel-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.admin-panel-toolbar .form-input { flex: 1 1 220px; min-width: 0; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 768px) {
   .sidebar { width: 60px; }

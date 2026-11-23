@@ -50,7 +50,8 @@ const PAGE_FEATURES = {
 };
 
 function can(feature) {
-  return !feature || !!(entitlements && entitlements.features && entitlements.features[feature]);
+  if (feature === 'owner') return isOwner();
+  return !!(entitlements && entitlements.features && entitlements.features[feature]);
 }
 
 function requiredPlanFor(feature) {
@@ -2816,7 +2817,7 @@ async function renderAdminPanel() {
     </header>
     <section class="admin-panel-body">
       <div class="admin-panel-toolbar">
-        <input type="search" id="adminSearch" placeholder="${escapeHtml(tr('Search users...'))}" autocomplete="off" />
+        <input type="search" id="adminSearch" class="form-input" placeholder="${escapeHtml(tr('Search users...'))}" autocomplete="off" />
         <button class="btn btn-secondary btn-sm" id="adminRefresh">${escapeHtml(tr('Refresh'))}</button>
         <button class="btn btn-primary btn-sm" id="adminNewUser">${escapeHtml(tr('New user'))}</button>
         <button class="btn btn-secondary btn-sm" id="adminExport">${escapeHtml(tr('Download Excel'))}</button>
@@ -2879,8 +2880,8 @@ function renderAdminTable() {
       <td>${escapeHtml(user.registeredAt || '')}</td>
       <td><span class="badge ${status === 'Active' ? 'badge-applied' : 'badge-drafted'}">${status}</span></td>
       <td>
-        <button class="action-btn" onclick="window.adminOpenModal(this)" data-id="${id}">${escapeHtml(tr('Edit'))}</button>
-        <button class="action-btn danger" onclick="window.adminDelete(this)" data-id="${id}">${escapeHtml(tr('Delete'))}</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.adminOpenModal(this)" data-id="${id}">${escapeHtml(tr('Edit'))}</button>
+        <button class="btn btn-danger btn-sm" onclick="window.adminDelete(this)" data-id="${id}">${escapeHtml(tr('Delete'))}</button>
       </td>
     </tr>`;
   }).join('');
