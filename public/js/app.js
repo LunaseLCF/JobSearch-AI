@@ -49,8 +49,15 @@ const PAGE_FEATURES = {
   admin: 'owner',
 };
 
+// Pages that require no feature gate (accessible to all logged-in users)
+const PUBLIC_PAGES = new Set([
+  'dashboard', 'search', 'evaluate', 'tracker', 'salary', 'profile', 'queries'
+]);
+
 function can(feature) {
   if (feature === 'owner') return isOwner();
+  // If no feature required for this page, allow access
+  if (!feature) return true;
   return !!(entitlements && entitlements.features && entitlements.features[feature]);
 }
 
