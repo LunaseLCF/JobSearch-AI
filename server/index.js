@@ -4,6 +4,8 @@ const path = require('path');
 const url = require('url');
 const os = require('os');
 const { execFileSync } = require('child_process');
+// Restore the SQLite file before auth/storage modules open it.
+require('./blob-sync').restoreSync();
 const auth = require('./auth');
 const store = require('./store');
 const { sendResetEmail, mailConfig } = require('./mailer');

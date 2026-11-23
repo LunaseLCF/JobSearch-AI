@@ -13,6 +13,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@netlify/blobs": "^9.1.6",
     "better-sqlite3": "^11.10.0"
   },
   "devDependencies": {
