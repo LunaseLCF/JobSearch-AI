@@ -15,6 +15,10 @@ services:
         value: /usr/bin/chromium
       - key: DATABASE_PATH
         value: /app/data/careercompass.sqlite
+      - key: NETLIFY_SITE_ID
+        sync: false
+      - key: NETLIFY_BLOBS_TOKEN
+        sync: false
       - key: COOKIE_SECURE
         value: "true"
       - key: APP_BASE_URL

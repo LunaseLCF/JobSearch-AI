@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
+const blobSync = require('./blob-sync');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -122,6 +123,7 @@ function writeFile(file, data) {
     VALUES (?, ?, ?, ?)
     ON CONFLICT(user_id, doc_key) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
   `).run(ref.userId, ref.key, JSON.stringify(data), nowIso());
+  blobSync.scheduleBackup();
 }
 
 function getDoc(userId, key) {
@@ -183,6 +185,7 @@ function writeUsers(users) {
     });
   });
   tx(users);
+  blobSync.scheduleBackup();
 }
 
 function readSessions() {
@@ -219,6 +222,7 @@ function writeSessions(sessions) {
     });
   });
   tx(sessions);
+  blobSync.scheduleBackup();
 }
 
 function deleteSessions(tokens) {
@@ -271,6 +275,7 @@ function writeResets(resets) {
     });
   });
   tx(resets);
+  blobSync.scheduleBackup();
 }
 
 function readUsage() {
@@ -299,6 +304,7 @@ function writeUsage(usage) {
     });
   });
   tx(usage);
+  blobSync.scheduleBackup();
 }
 
 // ---------- profile photos ----------
@@ -337,10 +343,12 @@ function savePhoto(userId, meta, buffer) {
     data: buffer,
     uploadedAt: meta.uploadedAt || nowIso(),
   });
+  blobSync.scheduleBackup();
 }
 
 function deletePhoto(userId) {
   requireDb().prepare('DELETE FROM profile_photos WHERE user_id = ?').run(safeUserId(userId));
+  blobSync.scheduleBackup();
 }
 
 function deleteUserData(userId) {
@@ -354,6 +362,7 @@ function deleteUserData(userId) {
     dbRef.prepare('DELETE FROM profile_photos WHERE user_id = ?').run(uid);
   });
   tx();
+  blobSync.scheduleBackup();
 }
 
 // ---------- one-time JSON -> SQLite migration ----------

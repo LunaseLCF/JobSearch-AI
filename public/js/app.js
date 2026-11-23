@@ -46,6 +46,7 @@ const PAGE_FEATURES = {
   repo: 'repo',
   report: 'exports',
   'llm-config': 'llmConfig',
+  admin: 'owner',
 };
 
 function can(feature) {
@@ -53,6 +54,7 @@ function can(feature) {
 }
 
 function requiredPlanFor(feature) {
+  if (feature === 'owner') return 'Owner';
   return feature === 'repo' || feature === 'llmConfig' ? 'Team' : 'Pro';
 }
 
@@ -75,14 +77,16 @@ const esc = escapeHtml;
 document.querySelectorAll('.nav-item').forEach(item => {
   if (item.dataset.external === 'true') return;
   item.addEventListener('click', () => {
-    const feature = PAGE_FEATURES[item.dataset.page];
+    const page = item.dataset.page;
+    if (page === 'admin' && !isOwner()) return;
+    const feature = PAGE_FEATURES[page];
     if (!can(feature)) {
       showUpgradeNotice(feature);
       return;
     }
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
-    currentPage = item.dataset.page;
+    currentPage = page;
     renderPage();
   });
 });
@@ -119,6 +123,7 @@ function renderPage() {
     case 'repo': renderRepo(); break;
     case 'report': renderReport(); break;
     case 'llm-config': renderLLMConfig(); break;
+    case 'admin': renderAdminPanel(); break;
   }
 }
 
@@ -2796,3 +2801,202 @@ if (document.readyState === 'loading') {
 } else {
   bootApp();
 }
+
+// ============ Admin Panel (owner-only SPA page) ============
+async function renderAdminPanel() {
+  const content = document.getElementById('page-content');
+  if (!isOwner()) {
+    content.innerHTML = '<div class="empty-state">Admin access is restricted to Owner accounts.</div>';
+    return;
+  }
+  content.innerHTML = `
+    <header class="admin-panel-head">
+      <h1 class="page-title">${escapeHtml(tr('Admin'))}</h1>
+      <div class="admin-panel-meta" id="adminMeta"></div>
+    </header>
+    <section class="admin-panel-body">
+      <div class="admin-panel-toolbar">
+        <input type="search" id="adminSearch" placeholder="${escapeHtml(tr('Search users...'))}" autocomplete="off" />
+        <button class="btn btn-secondary btn-sm" id="adminRefresh">${escapeHtml(tr('Refresh'))}</button>
+        <button class="btn btn-primary btn-sm" id="adminNewUser">${escapeHtml(tr('New user'))}</button>
+        <button class="btn btn-secondary btn-sm" id="adminExport">${escapeHtml(tr('Download Excel'))}</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr>
+            <th>${escapeHtml(tr('Name'))}</th>
+            <th>${escapeHtml(tr('Email'))}</th>
+            <th>${escapeHtml(tr('Level'))}</th>
+            <th>${escapeHtml(tr('Registered at'))}</th>
+            <th>${escapeHtml(tr('Status'))}</th>
+            <th style="width:120px">${escapeHtml(tr('Actions'))}</th>
+          </tr></thead>
+          <tbody id="adminTableBody"><tr><td colspan="6" class="empty-state">${escapeHtml(tr('Loading users...'))}</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  `;
+  window.adminLoad().catch(() => { /* handled inside */ });
+}
+
+const API_PREFIX = '/api';
+window.adminLoad = async function () {
+  try {
+    const res = await fetch(API_PREFIX + '/admin/users', { credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Forbidden');
+    const data = await res.json();
+    if (!Array.isArray(data.users)) throw new Error('Bad response');
+    window.adminUsers = data.users;
+    renderAdminTable();
+    const meta = document.getElementById('adminMeta');
+    if (meta) meta.textContent = data.users.length + ' registered users';
+  } catch (e) {
+    const body = document.getElementById('adminTableBody');
+    if (body) body.innerHTML = `<tr><td colspan="6" class="empty-state">Cannot load users. ${escapeHtml(String(e.message || ''))}</td></tr>`;
+    const meta = document.getElementById('adminMeta');
+    if (meta) meta.textContent = 'Offline';
+  }
+};
+
+function renderAdminTable() {
+  const query = String((window.adminSearch || {}).value || '').toLowerCase();
+  const users = Array.isArray(window.adminUsers) ? window.adminUsers : [];
+  const visible = query ? users.filter(u => !query || u.name?.toLowerCase().includes(query) || u.email?.toLowerCase().includes(query)) : users;
+  const tbody = document.getElementById('adminTableBody');
+  if (!tbody) return;
+  if (!visible.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No users found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = visible.map(user => {
+    const level = String(user.level || 'free').toUpperCase();
+    const status = String(user.status || 'Active');
+    const id = encodeURIComponent(user.id);
+    return `<tr>
+      <td>${escapeHtml(user.name || '')}</td>
+      <td>${escapeHtml(user.email)}</td>
+      <td><span class="badge badge-active">${level}</span></td>
+      <td>${escapeHtml(user.registeredAt || '')}</td>
+      <td><span class="badge ${status === 'Active' ? 'badge-applied' : 'badge-drafted'}">${status}</span></td>
+      <td>
+        <button class="action-btn" onclick="window.adminOpenModal(this)" data-id="${id}">${escapeHtml(tr('Edit'))}</button>
+        <button class="action-btn danger" onclick="window.adminDelete(this)" data-id="${id}">${escapeHtml(tr('Delete'))}</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function showAdminModal(user) {
+  const id = document.createElement('div');
+  id.className = 'modal-overlay';
+  id.dataset.userId = user ? user.id : '';
+  id.innerHTML = `
+    <div class="modal">
+      <div class="modal-header sticky">
+        <div class="modal-title">${user ? escapeHtml(tr('Edit user')) : escapeHtml(tr('New user'))}</div>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+      </div>
+      <form onsubmit="window.adminSaveModal(event, this)">
+        <div class="field-group">
+          <label>${escapeHtml(tr('Name'))}</label>
+          <input name="name" type="text" required value="${escapeHtml(user?.name || '')}" />
+        </div>
+        <div class="field-group">
+          <label>${escapeHtml(tr('Email'))}</label>
+          <input name="email" type="email" required ${user ? 'disabled' : ''} value="${escapeHtml(user?.email || '')}" />
+        </div>
+        <div class="field-group">
+          <label>${escapeHtml(tr('Password'))} <span style="color:var(--muted);font-weight:400">${user ? '(' + escapeHtml(tr('leave blank to keep')) + ')' : ''}</span></label>
+          <input name="password" type="password" minlength="8" ${user ? '' : 'required'} />
+        </div>
+        <div class="field-group">
+          <label>${escapeHtml(tr('User level'))}</label>
+          <select name="level" ${user ? '' : 'required'}>
+            <option value="free"${(user?.level||'')==='free'?' selected':''}>Free</option>
+            <option value="pro"${(user?.level||'')==='pro'?' selected':''}>Pro</option>
+            <option value="team"${(user?.level||'')==='team'?' selected':''}>Team</option>
+            <option value="owner"${(user?.level||'')==='owner'?' selected':''}>Owner</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>${escapeHtml(tr('Status'))}</label>
+          <select name="status">
+            <option value="Active"${(user?.status||'')==='Active'?' selected':''}>Active</option>
+            <option value="Disabled"${(user?.status||'')==='Disabled'?' selected':''}>Disabled</option>
+          </select>
+        </div>
+        <p class="status-msg" aria-live="polite"></p>
+        <div class="field-actions">
+          <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">${escapeHtml(tr('Cancel'))}</button>
+          <button type="submit" class="btn btn-primary">${user ? escapeHtml(tr('Save changes')) : escapeHtml(tr('Create user'))}</button>
+        </div>
+      </form>
+    </div>
+  `;
+  id.addEventListener('click', e => { if (e.target === id) id.remove(); });
+  document.body.appendChild(id);
+  id.querySelector('[name="name"]').focus();
+}
+window.adminOpenModal = showAdminModal;
+
+async function saveAdminModal(form) {
+  const msg = form.querySelector('.status-msg');
+  msg.textContent = '';
+  msg.style.color = 'var(--muted)';
+  try {
+    const payload = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim().toLowerCase(),
+      password: form.password.value,
+      level: form.level.value,
+      status: form.status.value,
+    };
+    const userId = form.closest('.modal-overlay').dataset.userId;
+    const url = API_PREFIX + '/admin/users' + (userId ? '/' + encodeURIComponent(userId) : '');
+    const res = await fetch(url, {
+      method: userId ? 'PUT' : 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Failed to save.');
+    form.closest('.modal-overlay').remove();
+    await window.adminLoad();
+  } catch (e) {
+    msg.textContent = e.message;
+    msg.style.color = 'var(--danger)';
+  }
+}
+window.adminSaveModal = saveAdminModal;
+
+async function deleteAdminUser(button) {
+  const id = button.dataset.id;
+  if (!confirm(tr('Are you sure you want to remove this user? This cannot be undone.'))) return;
+  try {
+    const res = await fetch(API_PREFIX + '/admin/users/' + id, { method: 'DELETE', credentials: 'same-origin' });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Failed to delete.');
+    await window.adminLoad();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+window.adminDelete = deleteAdminUser;
+
+// Expose search input for live filtering.
+document.addEventListener('click', e => {
+  const box = document.getElementById('adminSearch');
+  if (!box) return;
+  box.addEventListener('input', () => renderAdminTable());
+  document.getElementById('adminRefresh')?.addEventListener('click', window.adminLoad);
+  document.getElementById('adminNewUser')?.addEventListener('click', () => showAdminModal(null));
+  document.getElementById('adminExport')?.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = API_PREFIX + '/admin/users.xlsx';
+    link.download = 'registered_users.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });
+});
