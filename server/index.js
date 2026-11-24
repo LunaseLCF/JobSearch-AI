@@ -2885,7 +2885,7 @@ function analyzeResumeText(text, languageInfo = null) {
   // --- Extract Location ---
   // Look for common location patterns - use [^\S\n] instead of \s to avoid matching across lines
   const locationPatterns = [
-    // "Location: City, Country" or "Based in: City, Country" (strict format)
+    // "Location: City, Country" or "Based in: City, Country" (strict format with label)
     /(?:Address|Based in|Lives in|Location)\s*[:：]\s*(.+?)\s*(?:\||\n|$)/i,
     // Chinese labels followed by location
     /(?:所在地|现居地|居住地|现居住地|地址|地点|籍贯)\s*[:：]?\s*(.+?)\s*(?:\||\n|$)/i,
@@ -2894,6 +2894,51 @@ function analyzeResumeText(text, languageInfo = null) {
     // City, Country in a pipe-separated contact line: "London, United Kingdom | email"
     /(?:^|\n|\|\s*)([A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*,\s*[A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*)\s*\|/,
   ];
+
+  // Common countries and regions for validation
+  const COMMON_LOCATIONS = new Set([
+    'Thailand', 'Bangkok', 'China', 'Shanghai', 'Beijing', 'Guangzhou', 'Shenzhen',
+    'USA', 'United States', 'New York', 'California', 'Singapore', 'Malaysia',
+    'Hong Kong', 'Japan', 'Tokyo', 'Korea', 'Seoul', 'Australia', 'Sydney',
+    'UK', 'United Kingdom', 'London', 'Germany', 'France', 'Canada', 'India',
+  ]);
+
+  function isValidLocation(text) {
+    if (!text || text.length < 2 || text.length > 100) return false;
+
+    const trimmed = text.trim();
+
+    // Must contain at least one comma (City, Country format) or CJK chars
+    const hasComma = trimmed.includes(',');
+    const hasCjk = CJK_CHAR.test(trimmed);
+
+    if (!hasComma && !hasCjk) return false;
+
+    // Skip if it ends with sentence punctuation or looks like prose
+    if (/[.。！？]$/.test(trimmed)) return false;
+
+    // Skip if it starts with lowercase letter (likely mid-sentence)
+    if (/^[a-z]/.test(trimmed)) return false;
+
+    // For non-CJK text: must look like a proper location format
+    if (!hasCjk) {
+      // Must have comma-separated parts that both look meaningful
+      const parts = trimmed.split(',').map(p => p.trim()).filter(p => p.length > 0);
+      // Need at least 2 meaningful parts separated by comma
+      if (parts.length >= 2) {
+        const hasMeaningfulPart = parts.some(p => p.length >= 3 && /^[A-Z][a-z]+/.test(p));
+        if (hasMeaningfulPart) return true;
+      }
+      // Check for common location words or exact match
+      const hasLocationWord = /\b(城市|国家|州|省|郡|区|市|县|乡|镇|村|府|都|京|邦)\b/.test(text) ||
+                             COMMON_LOCATIONS.some(loc => text.toLowerCase() === loc.toLowerCase());
+      return hasLocationWord;
+    }
+
+    // CJK text just needs basic validity
+    return true;
+  }
+
   for (const pattern of locationPatterns) {
     const match = fullText.match(pattern);
     if (match && match[1]) {
@@ -2904,11 +2949,8 @@ function analyzeResumeText(text, languageInfo = null) {
       if (isResumeSectionHeader(loc)) continue;
       // Skip if contains degree/school keywords
       if (/\b(diploma|degree|bachelor|master|university|college|institute|certificate)\b/i.test(loc)) continue;
-      // Validate location format: must look like a place name
-      // At least one comma (City, Country) or CJK characters
-      const isCjkLocation = CJK_CHAR.test(loc);
-      const hasValidFormat = loc.includes(',') || isCjkLocation;
-      if (loc.length > 1 && hasValidFormat) {
+      // Validate location format
+      if (isValidLocation(loc)) {
         profile.identity.location = loc;
         break;
       }
