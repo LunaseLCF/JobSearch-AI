@@ -3134,7 +3134,7 @@ function analyzeResumeText(text, languageInfo = null) {
     }
 
     // Bullet point
-    const bullet = isBullet(line) ? line.replace(/^[-•*·▪◦‣⁃➤→]\s+/, '').trim() : null;
+    const bullet = isBullet(line) ? line.replace(/^[-•*·▪◦‣⁃➤→\uf0b7]\s+/, '').trim() : null;
     if (bullet && bullet.length > 3) {
       currentExp.bullets.push(bullet);
     }
