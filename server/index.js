@@ -2893,6 +2893,10 @@ function analyzeResumeText(text, languageInfo = null) {
     /(?:^|\n)\s*([A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*,\s*[A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*)\s*(?:\n|$)/,
     // City, Country in a pipe-separated contact line: "London, United Kingdom | email"
     /(?:^|\n|\|\s*)([A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*,\s*[A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*)\s*\|/,
+    // Format like "Thailand-based" or "Bangkok, Thailand-based"
+    /([A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*)-\s*based\b/i,
+    // Direct country name at start of line (common in CV headers)
+    /(?:^|\n)\s*([A-Z][a-z]+)\b(?=\s*$|[•\|])/i,
   ];
 
   // Common countries and regions for validation
@@ -2908,11 +2912,12 @@ function analyzeResumeText(text, languageInfo = null) {
 
     const trimmed = text.trim();
 
-    // Must contain at least one comma (City, Country format) or CJK chars
+    // Must contain at least one comma (City, Country format) or CJK chars or '-based' suffix
     const hasComma = trimmed.includes(',');
     const hasCjk = CJK_CHAR.test(trimmed);
+    const isBasedFormat = /-[ ]*based\b/i.test(trimmed);
 
-    if (!hasComma && !hasCjk) return false;
+    if (!hasComma && !hasCjk && !isBasedFormat) return false;
 
     // Skip if it ends with sentence punctuation or looks like prose
     if (/[.。！？]$/.test(trimmed)) return false;
@@ -2920,8 +2925,8 @@ function analyzeResumeText(text, languageInfo = null) {
     // Skip if it starts with lowercase letter (likely mid-sentence)
     if (/^[a-z]/.test(trimmed)) return false;
 
-    // For non-CJK text: must look like a proper location format
-    if (!hasCjk) {
+    // For non-CJK text without '-based' format: must have proper format
+    if (!hasCjk && !isBasedFormat) {
       // Must have comma-separated parts that both look meaningful
       const parts = trimmed.split(',').map(p => p.trim()).filter(p => p.length > 0);
       // Need at least 2 meaningful parts separated by comma
@@ -2931,8 +2936,18 @@ function analyzeResumeText(text, languageInfo = null) {
       }
       // Check for common location words or exact match
       const hasLocationWord = /\b(城市|国家|州|省|郡|区|市|县|乡|镇|村|府|都|京|邦)\b/.test(text) ||
-                             COMMON_LOCATIONS.some(loc => text.toLowerCase() === loc.toLowerCase());
+                             COMMON_LOCATIONS.has(trimmed.toLowerCase());
       return hasLocationWord;
+    }
+
+    // For '-based' format or CJK text
+    if (isBasedFormat) {
+      // Extract the location part before '-based'
+      const match = trimmed.match(/^([^-]+)-\s*based\b/i);
+      if (match && match[1]) {
+        const loc = match[1].trim();
+        return loc.length >= 2 && !/\b(城市|国家|州|省)\b/.test(loc);
+      }
     }
 
     // CJK text just needs basic validity
