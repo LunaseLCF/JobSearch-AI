@@ -14,6 +14,29 @@ const USER_DATA_ROOT = path.join(DATA_DIR, 'users');
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const RESET_TTL_MS = 30 * 60 * 1000;
 
+// Login ID counter - persists across restarts
+let loginIdCounter = 1000; // Start at 1000 for clean IDs like L1001, L1002
+const LOGIN_ID_FILE = path.join(DATA_DIR, 'login_id_counter.json');
+
+try {
+  const counterData = JSON.parse(fs.readFileSync(LOGIN_ID_FILE, 'utf8'));
+  if (counterData && typeof counterData.counter === 'number') {
+    loginIdCounter = counterData.counter;
+  }
+} catch (e) {
+  // File doesn't exist yet, use default
+}
+
+function saveLoginIdCounter() {
+  fs.writeFileSync(LOGIN_ID_FILE, JSON.stringify({ counter: loginIdCounter }, null, 2));
+}
+
+function getNextLoginId() {
+  loginIdCounter++;
+  saveLoginIdCounter();
+  return 'L' + loginIdCounter;
+}
+
 const requestContext = new AsyncLocalStorage();
 
 const BASE_FILES = {
@@ -337,9 +360,10 @@ function registerUser(body) {
   if (getUserByEmail(email)) return { error: 'Email already registered' };
   const users = readUsers();
   const id = 'user_' + crypto.randomBytes(6).toString('hex');
+  const loginId = getNextLoginId(); // Auto-assign unique login ID
   users[id] = {
     id, email, name: name || email.split('@')[0], plan: 'pro',
-    passwordHash: hashPassword(password), createdAt: nowIso(),
+    passwordHash: hashPassword(password), createdAt: nowIso(), loginId,
   };
   writeUsers(users);
   initializeUserData(id);

@@ -3655,6 +3655,7 @@ function requireOwner(req, res) {
 function adminUserView(user) {
   return {
     id: user.id,
+    loginId: user.loginId || '', // Auto-generated unique ID like L1001
     name: user.name || '',
     email: user.email,
     level: user.plan || 'free',

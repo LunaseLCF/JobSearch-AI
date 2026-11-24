@@ -2832,6 +2832,7 @@ async function renderAdminPanel() {
       <div class="table-container">
         <table>
           <thead><tr>
+            <th>${escapeHtml(tr('Login ID'))}</th>
             <th>${escapeHtml(tr('Name'))}</th>
             <th>${escapeHtml(tr('Email'))}</th>
             <th>${escapeHtml(tr('Level'))}</th>
@@ -2839,7 +2840,7 @@ async function renderAdminPanel() {
             <th>${escapeHtml(tr('Status'))}</th>
             <th style="width:120px">${escapeHtml(tr('Actions'))}</th>
           </tr></thead>
-          <tbody id="adminTableBody"><tr><td colspan="6" class="empty-state">${escapeHtml(tr('Loading users...'))}</td></tr></tbody>
+          <tbody id="adminTableBody"><tr><td colspan="7" class="empty-state">${escapeHtml(tr('Loading users...'))}</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -2873,7 +2874,7 @@ function renderAdminTable() {
   const tbody = document.getElementById('adminTableBody');
   if (!tbody) return;
   if (!visible.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No users found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No users found.</td></tr>`;
     return;
   }
   tbody.innerHTML = visible.map(user => {
@@ -2881,6 +2882,7 @@ function renderAdminTable() {
     const status = String(user.status || 'Active');
     const id = encodeURIComponent(user.id);
     return `<tr>
+      <td><code style="font-size:11px;color:var(--muted)">${escapeHtml(user.loginId || '-')}</code></td>
       <td>${escapeHtml(user.name || '')}</td>
       <td>${escapeHtml(user.email)}</td>
       <td><span class="badge badge-active">${level}</span></td>
