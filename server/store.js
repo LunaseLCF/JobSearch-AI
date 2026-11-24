@@ -34,7 +34,8 @@ function initStore() {
       name TEXT NOT NULL DEFAULT '',
       plan TEXT NOT NULL DEFAULT 'free',
       password_hash TEXT NOT NULL,
-      created_at TEXT NOT NULL
+      created_at TEXT NOT NULL,
+      login_id TEXT
     );
 
     CREATE TABLE IF NOT EXISTS sessions (
@@ -149,6 +150,7 @@ function readUsers() {
       plan: row.plan,
       passwordHash: row.password_hash,
       createdAt: row.created_at,
+      loginId: row.login_id || '',
     };
   });
   return out;
@@ -156,11 +158,12 @@ function readUsers() {
 
 function writeUsers(users) {
   const insert = requireDb().prepare(`
-    INSERT INTO users (id, email, name, plan, password_hash, created_at)
-    VALUES (@id, @email, @name, @plan, @passwordHash, @createdAt)
+    INSERT INTO users (id, email, name, plan, password_hash, created_at, login_id)
+    VALUES (@id, @email, @name, @plan, @passwordHash, @createdAt, @loginId)
     ON CONFLICT(id) DO UPDATE SET
       email = excluded.email, name = excluded.name, plan = excluded.plan,
-      password_hash = excluded.password_hash, created_at = excluded.created_at
+      password_hash = excluded.password_hash, created_at = excluded.created_at,
+      login_id = excluded.login_id
   `);
   const dbRef = requireDb();
   const removeDuplicateEmail = dbRef.prepare('DELETE FROM users WHERE email = ? AND id <> ?');
