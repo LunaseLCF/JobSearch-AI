@@ -191,6 +191,19 @@ function initAuth() {
     };
     writeUsers(users);
     initializeUserData(ownerId);
+  } else {
+    // Migrate existing users: assign loginId to those missing it
+    let migrated = 0;
+    Object.values(users).forEach(user => {
+      if (!user.loginId) {
+        user.loginId = getNextLoginId();
+        migrated++;
+      }
+    });
+    if (migrated > 0) {
+      writeUsers(users);
+      console.log(`[auth] migrated ${migrated} users to add loginId`);
+    }
   }
   return { ownerId };
 }
