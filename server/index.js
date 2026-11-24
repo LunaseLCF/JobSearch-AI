@@ -2669,7 +2669,7 @@ function extractSection(fullText, headerNames, stopHeaders) {
 const CN_DATE_TOKEN_RE = /(?:19|20)\d{2}(?:[.\-\/年]\d{1,2}(?!\d)(?:[.\-\/月]\d{1,2}(?!\d))?日?)?|至今|现在|目前|Present|Current/gi;
 const CN_COMPANY_RE = /(?:有限公司|股份有限公司|有限责任公司|科技公司|集团|公司|企业|研究院|研究所|事务所|工作室|银行|医院|学校|工厂|中心|科技|网络|信息|技术|数据|传媒|互联)/;
 const CN_ROLE_RE = /(?:首席|高级|资深|主管|经理|总监|总裁|总经理|副总|工程师|架构师|设计师|分析师|产品经理|项目经理|开发|研发|运营|销售|市场|会计|财务|人事|行政|实习|专员|助理|顾问|研究员|讲师|教师|医生|律师|技师|负责人|组长|leader|manager|engineer|developer|analyst|designer|director|consultant|intern)/i;
-const CN_BULLET_RE = /^(?:[-•*·▪◦‣⁃➤→]|\d{1,2}[.)、]|[(（]\d{1,2}[)）]|[①②③④⑤⑥⑦⑧⑨⑩])\s*/;
+const CN_BULLET_RE = /^(?:[-•*·▪◦‣⁃➤→\uf0b7]|\d{1,2}[.)、]|[(（]\d{1,2}[)）]|[①②③④⑤⑥⑦⑧⑨⑩])\s*/;
 const CN_LABEL_ONLY_RE = /^(?:工作职责|职责业绩|岗位职责|工作内容|工作描述|主要职责|工作业绩|项目职责|Responsibilities?)\s*[:：]?$/i;
 const CN_DEGREE_RE = /(?:博士研究生|硕士研究生|博士|硕士|本科|学士|大专|专科|学位|MBA|Bachelor|Master|PhD|Diploma)/i;
 const CN_SCHOOL_RE = /(?:大学|学院|学校|研究院|校区|Polytechnic|University|College|Institute)/i;
@@ -3053,7 +3053,7 @@ function analyzeResumeText(text, languageInfo = null) {
   const dateAnywhere = new RegExp(`((?:${MONTHS})\\s+\\d{4})|(\\b20\\d{2}\\b)|(\\b19\\d{2}\\b)|(Present|Current|Now)`, 'gi');
 
   // Bullet markers: -, •, *, ·, or arrow characters
-  const isBullet = (line) => /^[-•*·▪◦‣⁃➤→]\s+/.test(line);
+  const isBullet = (line) => /^[-•*·▪◦‣⁃➤→\uf0b7]\s+/.test(line);
   // A job-title line: "Title | Company", "Title at Company", "Title, Company",
   // or a short TitleCase line containing a role keyword with no bullet marker
   const ROLE_WORDS = /(manager|engineer|developer|analyst|director|lead|supervisor|coordinator|specialist|executive|officer|programmer|consultant|assistant|associate|administrator|designer|architect|technician|sales|marketing|accountant|controller|recruiter|clerk|intern|trainee|head|chief|president|partner|analyst|代表|经理|工程师|主管|专员|总监|开发|设计)/i;
