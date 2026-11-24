@@ -2961,7 +2961,8 @@ async function saveAdminModal(form) {
       level: form.level.value,
       status: form.status.value,
     };
-    const userId = form.closest('.modal-overlay').dataset.userId;
+    const overlay = form.closest('.modal-overlay');
+    const userId = overlay ? overlay.dataset.userId : '';
     const url = API_PREFIX + '/admin/users' + (userId ? '/' + encodeURIComponent(userId) : '');
     const res = await fetch(url, {
       method: userId ? 'PUT' : 'POST',
