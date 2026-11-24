@@ -2885,10 +2885,11 @@ function analyzeResumeText(text, languageInfo = null) {
   // --- Extract Location ---
   // Look for common location patterns - use [^\S\n] instead of \s to avoid matching across lines
   const locationPatterns = [
-    // "Location: City, Country" or "Based in: City, Country"
-    /(?:Address|Based in|Lives in)\s*:?\s*([^\n|]+)/i,
-    /(?:所在地|现居地|居住地|现居住地|地址|地点|籍贯|Location)\s*[:：]?\s*([^\n|]+)/i,
-    // City, Country on its own line (must have comma)
+    // "Location: City, Country" or "Based in: City, Country" (strict format)
+    /(?:Address|Based in|Lives in|Location)\s*[:：]\s*(.+?)\s*(?:\||\n|$)/i,
+    // Chinese labels followed by location
+    /(?:所在地|现居地|居住地|现居住地|地址|地点|籍贯)\s*[:：]?\s*(.+?)\s*(?:\||\n|$)/i,
+    // City, Country on its own line (must have comma for Western format)
     /(?:^|\n)\s*([A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*,\s*[A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*)\s*(?:\n|$)/,
     // City, Country in a pipe-separated contact line: "London, United Kingdom | email"
     /(?:^|\n|\|\s*)([A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*,\s*[A-Z][a-z]+(?:[^\S\n][A-Z][a-z]+)*)\s*\|/,
@@ -2896,11 +2897,18 @@ function analyzeResumeText(text, languageInfo = null) {
   for (const pattern of locationPatterns) {
     const match = fullText.match(pattern);
     if (match && match[1]) {
-      const loc = match[1].trim().replace(/\s*\|.*$/, '').substring(0, 100);
+      let loc = match[1].trim();
+      // Remove trailing parts after pipe or newline
+      loc = loc.replace(/\s*\|.*$/, '').replace(/\s*\n.*$/, '').substring(0, 100);
+      // Skip section headers
       if (isResumeSectionHeader(loc)) continue;
+      // Skip if contains degree/school keywords
       if (/\b(diploma|degree|bachelor|master|university|college|institute|certificate)\b/i.test(loc)) continue;
+      // Validate location format: must look like a place name
+      // At least one comma (City, Country) or CJK characters
       const isCjkLocation = CJK_CHAR.test(loc);
-      if (loc.length > 1 && (isCjkLocation || (loc.split(/\s+/).length <= 6 && loc.includes(',')))) {
+      const hasValidFormat = loc.includes(',') || isCjkLocation;
+      if (loc.length > 1 && hasValidFormat) {
         profile.identity.location = loc;
         break;
       }
