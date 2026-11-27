@@ -2889,14 +2889,15 @@ function renderAdminTable() {
       <td>${escapeHtml(user.registeredAt || '')}</td>
       <td><span class="badge ${status === 'Active' ? 'badge-applied' : 'badge-drafted'}">${status}</span></td>
       <td>
-        <button class="btn btn-secondary btn-sm" onclick="window.adminOpenModal(${JSON.stringify(user)})">${escapeHtml(tr('Edit'))}</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.adminOpenModal('${escapeHtml(user.loginId || '')}')">${escapeHtml(tr('Edit'))}</button>
         <button class="btn btn-danger btn-sm" onclick="window.adminDelete(this)" data-id="${id}">${escapeHtml(tr('Delete'))}</button>
       </td>
     </tr>`;
   }).join('');
 }
 
-function showAdminModal(user) {
+function showAdminModal(loginId) {
+  const user = loginId ? (Array.isArray(window.adminUsers) ? window.adminUsers.find(u => u.loginId === loginId) : null) : null;
   const id = document.createElement('div');
   id.className = 'modal-overlay';
   id.dataset.userId = user ? user.id : '';
