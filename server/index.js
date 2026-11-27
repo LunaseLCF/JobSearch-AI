@@ -337,10 +337,220 @@ function languageDirective(language) {
 }
 
 function localizedTitle(language) {
-  const key = String(language || '').toLowerCase();
-  if (key === 'cn') return '关键成就';
-  if (key === 'th') return 'ความสำเร็จหลัก';
-  return 'Key Achievement';
+  return localText(language, 'starKeyAchievement');
+}
+
+// Local templates for the no-AI prep path. Profile facts (names, companies,
+// skills, dates) are inserted verbatim; only the scaffolding is translated.
+const LOCAL_TEXT = {
+  en: {
+    starKeyAchievement: 'Key Achievement', starProject: 'Project', starCompany: 'Company', starProfessional: 'professional',
+    starTitle: '{title} at {company}',
+    starSituation: 'As a {title} at {company}, responsible for {detail}.',
+    starSituationNoDetail: 'key operations',
+    starTaskWithLocation: 'Balance delivery across {location}.',
+    starTaskWithLocationSkills: 'Balance delivery across {location} while applying {skills}.',
+    starTaskNoLocation: 'Deliver on core KPIs including throughput, quality, cost control, and stakeholder satisfaction.',
+    starAction: 'Outline the specific decisions, tools, frameworks, and cross-functional coordination you used. Reference a measurable metric if possible.',
+    starResult: 'Quantify the outcome — revenue, headcount, SLA improvement, cycle-time reduction, or customer retention — and state what you changed for future iterations.',
+
+    qIntro: 'Tell me about yourself and why this role at our company matters to you right now.',
+    qWhyHere: 'Why do you want to work here rather than a peer company?',
+    qStrengths: 'What strengths make you confident you can deliver in this role from day one?',
+    qChallenge: 'Describe a challenging project or situation and how you navigated it.',
+    qFiveYears: 'Where do you see yourself professionally in three to five years?',
+    qMotivation: 'What motivates you most and what drains your energy?',
+    qCompanyKnowledge: 'What do you know about our products, market position, or recent initiatives?',
+    qDifficultColleague: 'I\'d like to hear about a time you worked with a difficult colleague or stakeholder.',
+    qSalary: 'What are your salary expectations for this level?',
+    qAnythingElse: 'Is there anything we have not covered that you would like me to know?',
+    qAppliedSkills: 'How have you applied {skills} in your recent roles?',
+    qCoreCompetencies: 'Which of the core competencies listed in this posting do you feel strongest against, and where might you need support early on?',
+    qConflictTeam: 'How do you handle conflict or underperformance within your team?',
+    qManagementStyle: 'Describe your management and delegation style with a concrete example.',
+    qPriorities: 'When priorities collide, how do you decide what to defer?',
+    qAmbiguousGoal: 'How do you align a team around an ambiguous or evolving goal?',
+    qTechDecision: 'Walk me through a technical decision you made recently and why.',
+    qSpeedVsQuality: 'How do you balance shipping fast against code quality and maintainability?',
+    qMentor: 'Tell me about a time you mentored someone or raised the bar for the team.',
+
+    tpSkills: '{skills} — how each maps to a requirement in this posting',
+    tpBackground: 'My background as a {title} at {company}: {detail}', tpDetailFallback: 'consistent delivery',
+    tpDomain: 'Domain depth in {skills} — relevant because this role operates at that intersection',
+    tpCareer: 'Career trajectory: moving toward {roles}, which is why this next step makes sense now',
+    tpStrengths: 'Recurring strengths I bring: {strengths}',
+    tpFallback1: 'Core competencies that match the posting',
+    tpFallback2: 'Two or three measurable wins from my most recent role',
+    tpFallback3: 'Why I am motivated to join this company specifically',
+
+    aqSuccess: 'What does success look like in the first six to twelve months for a {role}?',
+    aqReporting: 'Who will I report to and how is the team structured?',
+    aqBlockers: 'What are the biggest blockers the person in this role will face in quarter one?',
+    aqGrowth: 'How does the company invest in growth and internal mobility?',
+    aqOnboarding: 'What does the onboarding and ramp-up path look like?',
+    aqNextSteps: 'What are the next steps and timeline in the process?',
+    aqAsync: 'How does the team collaborate asynchronously versus synchronously?',
+    aqScaling: 'What stage of scaling is the org in, and what has been the hardest lesson so far?',
+    aqReviews: 'How are performance reviews and promotions handled here?',
+    aqAutonomy: 'What autonomy does this role have over hiring and budget?',
+
+    cfApproachBehavioral: 'Use STAR: set the situation in one sentence, name your task, explain the actions you personally took, then quantify the result. Keep it to 60-90 seconds.',
+    cfApproachTechnical: 'State the goal and constraints first, walk through your reasoning step by step, call out trade-offs, and finish with the outcome and what you would change.',
+    cfApproachGeneral: 'Answer directly in the first sentence, support it with one real example from your profile, and close by linking back to the role.',
+    cfRoleFallback: 'role', cfCompanyFallback: 'your organization',
+    cfAnchorSkills: 'Anchor your answer in {skills} from your profile.',
+    cfUseExperience: 'Use your {title} experience at {company} as the concrete example.',
+    cfConnectRole: 'Connect the example to the {role} role\'s core requirements.',
+    cfChooseProject: 'Choose one real project from your profile and keep the details verifiable.',
+    cfExampleFromRole: 'In your {title} role at {company}, describe the situation, your task, the specific actions you took, and a measurable result you can verify.',
+    cfExampleGeneric: 'Pick a real project from your profile. Describe the situation, your task, your actions, and a result you can verify.',
+    cfPitfall1: 'Do not invent metrics, employers, or results — use prompts where facts are missing.',
+    cfPitfall2: 'Avoid listing responsibilities; focus on one clear story.',
+    cfPitfall3: 'Rehearse the ending so the result lands in under 90 seconds.',
+    enterQuestion: 'Enter at least one question.',
+  },
+  th: {
+    starKeyAchievement: 'ความสำเร็จหลัก', starProject: 'โปรเจกต์', starCompany: 'บริษัท', starProfessional: 'ผู้เชี่ยวชาญ',
+    starTitle: '{title} ที่ {company}',
+    starSituation: 'ในฐานะ {title} ที่ {company} รับผิดชอบ {detail}',
+    starSituationNoDetail: 'งานหลัก',
+    starTaskWithLocation: 'บริหารการส่งมอบใน {location}',
+    starTaskWithLocationSkills: 'บริหารการส่งมอบใน {location} โดยใช้ทักษะ {skills}',
+    starTaskNoLocation: 'ส่งมอบตาม KPI หลักด้านปริมาณ คุณภาพ การควบคุมต้นทุน และความพึงพอใจของผู้มีส่วนได้ส่วนเสีย',
+    starAction: 'ระบุการตัดสินใจ เครื่องมือ กรอบงาน และการประสานงานข้ามทีมที่คุณใช้ พร้อมตัวเลขที่วัดได้หากมี',
+    starResult: 'ระบุผลลัพธ์เป็นตัวเลข เช่น รายได้ จำนวนพนักงาน SLA เวลาดำเนินการ หรือการรักษาลูกค้า และบอกสิ่งที่คุณปรับปรุงในรอบถัดไป',
+
+    qIntro: 'เล่าถึงตัวคุณเองและทำไมตำแหน่งนี้ที่บริษัทของเราจึงสำคัญกับคุณในตอนนี้',
+    qWhyHere: 'ทำไมคุณถึงอยากทำงานที่นี่มากกว่าบริษัทอื่นในอุตสาหกรรมเดียวกัน?',
+    qStrengths: 'จุดแข็งอะไรที่ทำให้คุณมั่นใจว่าจะส่งมอบงานได้ตั้งแต่วันแรก?',
+    qChallenge: 'อธิบายโปรเจกต์หรือสถานการณ์ที่ท้าทายและวิธีที่คุณจัดการกับมัน',
+    qFiveYears: 'คุณเห็นตัวเองอยู่จุดไหนในอีก 3-5 ปีข้างหน้า?',
+    qMotivation: 'อะไรทำให้คุณมีแรงจูงใจมากที่สุด และอะไรทำให้คุณหมดพลัง?',
+    qCompanyKnowledge: 'คุณรู้อะไรเกี่ยวกับผลิตภัณฑ์ ตำแหน่งในตลาด หรือโครงการล่าสุดของเราบ้าง?',
+    qDifficultColleague: 'อยากฟังครั้งที่คุณต้องทำงานกับเพื่อนร่วมงานหรือผู้มีส่วนได้ส่วนเสียที่ยากลำบาก',
+    qSalary: 'ความคาดหวังด้านเงินเดือนของคุณสำหรับระดับนี้เป็นเท่าไหร่?',
+    qAnythingElse: 'มีอะไรที่เรายังไม่ได้ถามและคุณอยากให้เรารู้ไหม?',
+    qAppliedSkills: 'คุณเคยใช้ {skills} ในงานล่าสุดของคุณอย่างไร?',
+    qCoreCompetencies: 'คุณแข็งในความสามารถหลักข้อไหนตามประกาศงานนี้ และจุดไหนที่คุณอาจต้องการการสนับสนุนในช่วงแรก?',
+    qConflictTeam: 'คุณจัดการความขัดแย้งหรือผลงานที่ไม่เป็นไปตามเป้าของสมาชิกในทีมอย่างไร?',
+    qManagementStyle: 'อธิบายสไตล์การบริหารและการมอบหมายงานของคุณพร้อมตัวอย่างจริง',
+    qPriorities: 'เมื่อความสำคัญของงานทับกัน คุณตัดสินใจเลื่อนอะไรออกไป?',
+    qAmbiguousGoal: 'คุณทำให้ทีมเห็นพ้องต้องกันอย่างไรเมื่อเป้าหมายยังไม่ชัดเจนหรือเปลี่ยนอยู่ตลอด?',
+    qTechDecision: 'เล่าการตัดสินใจทางเทคนิคที่คุณทำล่าสุดและเหตุผลเบื้องหลัง',
+    qSpeedVsQuality: 'คุณสมดุลระหว่างการส่งงานเร็วกับคุณภาพและการดูแลรักษาระยะยาวอย่างไร?',
+    qMentor: 'เล่าครั้งที่คุณสอนงานผู้อื่นหรือยกระดับมาตรฐานของทีม',
+
+    tpSkills: '{skills} — แต่ละทักษะสอดคล้องกับข้อกำหนดในประกาศงานนี้อย่างไร',
+    tpBackground: 'ประสบการณ์ของฉันในฐานะ {title} ที่ {company}: {detail}', tpDetailFallback: 'การส่งมอบงานอย่างต่อเนื่อง',
+    tpDomain: 'ความเชี่ยวชาญเฉพาะด้านใน {skills} — เกี่ยวข้องเพราะตำแหน่งนี้อยู่ที่จุดตัดดังกล่าว',
+    tpCareer: 'เส้นทางอาชีพ: กำลังมุ่งสู่ {roles} ซึ่งเป็นเหตุผลที่ก้าวต่อไปนี้เหมาะสมในตอนนี้',
+    tpStrengths: 'จุดแข็งที่ฉันนำมาใช้ซ้ำ ๆ: {strengths}',
+    tpFallback1: 'ความสามารถหลักที่ตรงกับประกาศงาน',
+    tpFallback2: 'ความสำเร็จที่วัดผลได้สองสามอย่างจากตำแหน่งล่าสุด',
+    tpFallback3: 'เหตุผลที่ฉันต้องการเข้าร่วมบริษัทนี้โดยเฉพาะ',
+
+    aqSuccess: 'ความสำเร็จใน 6-12 เดือนแรกของตำแหน่ง {role} มีลักษณะอย่างไร?',
+    aqReporting: 'ฉันจะรายงานต่อใครและทีมมีโครงสร้างอย่างไร?',
+    aqBlockers: 'อุปสรรคใหญ่ที่สุดที่คนในตำแหน่งนี้จะเผชิญในไตรมาสแรกคืออะไร?',
+    aqGrowth: 'บริษัทส่งเสริมการเติบโตและการย้ายตำแหน่งภายในอย่างไร?',
+    aqOnboarding: 'เส้นทางการปฐมนิเทศและการเริ่มต้น work มีลักษณะอย่างไร?',
+    aqNextSteps: 'ขั้นตอนถัดไปและไทม์ไลน์ของกระบวนการเป็นอย่างไร?',
+    aqAsync: 'ทีมทำงานแบบอะซิงโครนัสและซิงโครนัสอย่างไร?',
+    aqScaling: 'ตอนนี้องค์กรอยู่ในช่วงขยายตัวแบบไหน และบทเรียนที่ยากที่สุดจนถึงตอนนี้คืออะไร?',
+    aqReviews: 'บริษัทประเมินผลงานและเลื่อนขั้นอย่างไร?',
+    aqAutonomy: 'ตำแหน่งนี้มีอิสระในการสรรหาและงบประมาณมากน้อยแค่ไหน?',
+
+    cfApproachBehavioral: 'ใช้ STAR: สร้างสถานการณ์ในหนึ่งประโยค ระบุหน้าที่ของคุณ อธิบายการกระทำที่คุณทำเอง แล้วระบุผลลัพธ์เป็นตัวเลข ใช้เวลา 60-90 วินาที',
+    cfApproachTechnical: 'เริ่มจากเป้าหมายและข้อจำกัด อธิบายเหตุผลทีละขั้น บอกข้อแลกเปลี่ยน แล้วปิดด้วยผลลัพธ์และสิ่งที่คุณจะปรับปรุง',
+    cfApproachGeneral: 'ตอบตรงประเด็นในประโยคแรก ใช้ตัวอย่างจริงจากโปรไฟล์สนับสนุน แล้วปิดด้วยความเกี่ยวข้องกับตำแหน่ง',
+    cfRoleFallback: 'ตำแหน่ง', cfCompanyFallback: 'องค์กรของคุณ',
+    cfAnchorSkills: 'โยงคำตอบของคุณกับ {skills} จากโปรไฟล์',
+    cfUseExperience: 'ใช้ประสบการณ์ {title} ที่ {company} เป็นตัวอย่างชัดเจน',
+    cfConnectRole: 'เชื่อมตัวอย่างเข้ากับความต้องการหลักของตำแหน่ง {role}',
+    cfChooseProject: 'เลือกโปรเจกต์จริงสักหนึ่งอย่างจากโปรไฟล์และรักษารายละเอียดให้ตรวจสอบได้',
+    cfExampleFromRole: 'ในตำแหน่ง {title} ที่ {company} ให้เล่าสถานการณ์ หน้าที่ของคุณ การกระทำที่คุณทำ และผลลัพธ์ที่วัดได้',
+    cfExampleGeneric: 'เลือกโปรเจกต์จริงจากโปรไฟล์ แล้วเล่าสถานการณ์ หน้าที่ การกระทำ และผลลัพธ์ที่ตรวจสอบได้',
+    cfPitfall1: 'อย่าแต่งตัวเลข นายจ้าง หรือผลลัพธ์ — ใช้ช่องว่างแทนเมื่อไม่มีข้อมูลจริง',
+    cfPitfall2: 'อย่าเพียงรายการความรับผิดชอบ ให้เน้นเรื่องราวเดียวที่ชัดเจน',
+    cfPitfall3: 'ซ้อมตอนจบให้ผลลัพธ์สั้นกว่า 90 วินาที',
+    enterQuestion: 'ป้อนคำถามอย่างน้อยหนึ่งข้อ',
+  },
+  cn: {
+    starKeyAchievement: '关键成就', starProject: '项目', starCompany: '公司', starProfessional: '专业人士',
+    starTitle: '{title} · {company}',
+    starSituation: '作为 {company} 的 {title}，负责 {detail}。',
+    starSituationNoDetail: '核心工作',
+    starTaskWithLocation: '在 {location} 协调交付。',
+    starTaskWithLocationSkills: '在 {location} 协调交付，并运用 {skills}。',
+    starTaskNoLocation: '达成核心 KPI：产出、质量、成本控制和相关方满意度。',
+    starAction: '说明你采取的具体决策、工具、方法和跨团队协作，并尽可能引用可量化的指标。',
+    starResult: '量化结果——收入、人数、SLA 改善、周期缩短或客户留存——并说明后续迭代中的改进。',
+
+    qIntro: '请介绍一下你自己，以及为什么现在这个职位对你很重要。',
+    qWhyHere: '你为什么想加入我们，而不是同行业的其他公司？',
+    qStrengths: '哪些优势让你有信心入职第一天就能交付成果？',
+    qChallenge: '请描述一个充满挑战的项目或情境，以及你是如何应对的。',
+    qFiveYears: '你如何看待自己未来三到五年的发展？',
+    qMotivation: '什么最能激励你？什么会消耗你的精力？',
+    qCompanyKnowledge: '你对我们的产品、市场定位或近期举措有哪些了解？',
+    qDifficultColleague: '请讲一次你与难相处的同事或相关方合作的经历。',
+    qSalary: '你对这个级别的薪资期望是多少？',
+    qAnythingElse: '有没有我们还没问到、但你想让我们知道的事情？',
+    qAppliedSkills: '你在最近的岗位上如何运用 {skills}？',
+    qCoreCompetencies: '这份职位要求的核心能力中，你最擅长哪一项？哪些地方初期可能需要支持？',
+    qConflictTeam: '你如何处理团队内部的冲突或绩效不佳的情况？',
+    qManagementStyle: '请结合具体例子说明你的管理和授权风格。',
+    qPriorities: '当优先级冲突时，你如何决定推迟哪一项？',
+    qAmbiguousGoal: '当目标模糊或不断变化时，你如何让团队达成一致？',
+    qTechDecision: '请讲讲你最近做的一个技术决策及其原因。',
+    qSpeedVsQuality: '你如何平衡快速交付与代码质量和长期可维护性？',
+    qMentor: '请讲一次你辅导他人或提升团队标准的经历。',
+
+    tpSkills: '{skills}——每一项如何对应这份职位的要求',
+    tpBackground: '我在 {company} 担任 {title} 的经历：{detail}', tpDetailFallback: '持续稳定交付',
+    tpDomain: '在 {skills} 领域的深耕——这个职位正好处于该交叉点',
+    tpCareer: '职业轨迹：正朝着 {roles} 发展，因此这一步在当下很合理',
+    tpStrengths: '我持续展现的优势：{strengths}',
+    tpFallback1: '与职位要求匹配的核心能力',
+    tpFallback2: '最近岗位上的两三个可量化成果',
+    tpFallback3: '我特别想加入这家公司的原因',
+
+    aqSuccess: '在这个职位上前 6-12 个月的成功是什么样的？',
+    aqReporting: '我会向谁汇报？团队结构是怎样的？',
+    aqBlockers: '这个职位的人在第一季度会遇到的最大障碍是什么？',
+    aqGrowth: '公司如何支持成长和内部转岗？',
+    aqOnboarding: '入职和上手路径是怎样的？',
+    aqNextSteps: '接下来的流程和时间安排是怎样的？',
+    aqAsync: '团队如何协同异步与同步工作？',
+    aqScaling: '组织目前处于什么扩张阶段？到目前为止最难的一课是什么？',
+    aqReviews: '这里如何进行绩效评估和晋升？',
+    aqAutonomy: '这个职位在招聘和预算方面有多大自主权？',
+
+    cfApproachBehavioral: '使用 STAR：用一句话交代情境，说明你的任务，讲清你本人采取的行动，最后量化结果。控制在 60-90 秒。',
+    cfApproachTechnical: '先说明目标和限制，再逐步讲清推理过程，指出权衡取舍，最后给出结果和你会做的改进。',
+    cfApproachGeneral: '第一句直接给结论，用一个真实案例支撑，最后回扣到这个职位。',
+    cfRoleFallback: '职位', cfCompanyFallback: '你所在的组织',
+    cfAnchorSkills: '把回答锚定在你资料中的 {skills} 上。',
+    cfUseExperience: '用你在 {company} 担任 {title} 的经历作为具体案例。',
+    cfConnectRole: '把案例与 {role} 职位的核心要求联系起来。',
+    cfChooseProject: '从资料中选一个真实项目，并保持细节可核实。',
+    cfExampleFromRole: '在 {company} 担任 {title} 时，描述当时的情境、你的任务、你采取的具体行动，以及一个可核实的量化结果。',
+    cfExampleGeneric: '从资料中选一个真实项目，描述情境、任务、行动和结果，确保可核实。',
+    cfPitfall1: '不要编造指标、雇主或结果——缺少事实时用提示语代替。',
+    cfPitfall2: '不要只罗列职责，聚焦一个清晰的故事。',
+    cfPitfall3: '演练结尾，让结果在 90 秒内讲完。',
+    enterQuestion: '请至少输入一个问题。',
+  },
+};
+
+function localText(language, key, vars = {}) {
+  const lang = String(language || 'en').toLowerCase();
+  const table = LOCAL_TEXT[lang] || LOCAL_TEXT.en;
+  let text = table[key] || LOCAL_TEXT.en[key] || key;
+  Object.entries(vars).forEach(([name, value]) => {
+    text = text.split(`{${name}}`).join(String(value ?? ''));
+  });
+  return text;
 }
 
 async function aiTailoringReport(profile, company, role, posting, language) {
@@ -377,13 +587,30 @@ async function aiTailoringReport(profile, company, role, posting, language) {
   };
 }
 
+/** Normalize one advice item into { text, example }; accepts legacy strings. */
+function prepExampleItem(value, textKey, exampleKey) {
+  if (value && typeof value === 'object') {
+    const text = String(value[textKey] || value.text || '').trim();
+    const example = String(value[exampleKey] || value.example || '').trim();
+    return text ? { text, example } : null;
+  }
+  const text = String(value || '').trim();
+  return text ? { text, example: '' } : null;
+}
+
+function prepExampleList(value, textKey, exampleKey) {
+  return Array.isArray(value)
+    ? value.map(item => prepExampleItem(item, textKey, exampleKey)).filter(Boolean)
+    : [];
+}
+
 async function aiInterviewPrep(profile, company, role, posting, language) {
   const directive = languageDirective(language);
-  const system = 'You are an experienced interview coach. Base everything strictly on the candidate profile and the job posting. Never invent metrics or experience. Return JSON only, with keys: starExamples (array of objects with title, situation, task, action, result), likelyQuestions (array of strings), talkingPoints (array of strings), questionsToAsk (array of strings). ' + directive;
-  const prompt = `Candidate profile (JSON):\n${compactProfileFacts(profile)}\n\nInterviewing company: ${company}\nRole: ${role}\nJob posting:\n${posting || '(not provided)'}\n\nCreate a practical prep pack: 3-4 STAR examples from the candidate's REAL experience (leave action/result as focused prompts when facts are missing), 8-12 likely interview questions tailored to the role and posting, 4-6 talking points using the candidate's own evidence, and 5-8 thoughtful questions the candidate should ask. Return only JSON.\n\n${directive}`;
+  const system = 'You are an experienced interview coach. Base everything strictly on the candidate profile and the job posting. Never invent metrics or experience. Every item must include a concrete worked example, never just an idea or a prompt. Return JSON only, with keys: starExamples (array of objects with title, situation, task, action, result — each field fully written as a real story, using [verified metric] only when a number is missing), likelyQuestions (array of objects with question and exampleAnswer — a complete model answer), talkingPoints (array of objects with point and example — a specific illustration from the profile), questionsToAsk (array of objects with question and example — when to ask it and what a useful answer looks like). ' + directive;
+  const prompt = `Candidate profile (JSON):\n${compactProfileFacts(profile)}\n\nInterviewing company: ${company}\nRole: ${role}\nJob posting:\n${posting || '(not provided)'}\n\nCreate a practical prep pack: 3-4 STAR examples from the candidate's REAL experience, each written as a complete situation/task/action/result narrative (never instructions like "describe what you did"), 8-12 likely interview questions each with a full exampleAnswer the candidate can adapt, 4-6 talking points each with a concrete example from the profile, and 5-8 thoughtful questions to ask the interviewer each with an example of why it is worth asking. Return only JSON.\n\n${directive}`;
   let text;
   try {
-    text = await callLLM(prompt, system, { maxTokens: 3500 });
+    text = await callLLM(prompt, system, { maxTokens: 5000 });
   } catch (e) {
     if (!/contentFilter|1301|HTTP 400/i.test(e.message)) throw e;
     // Some providers flag long personal-history prompts. Retry with a shorter,
@@ -395,11 +622,10 @@ async function aiInterviewPrep(profile, company, role, posting, language) {
       roles: (profile.experience || []).map(x => `${x.title || ''} at ${x.company || ''}`).filter(Boolean),
       targetRoles: profile.careerGoals?.targetRoles || [],
     });
-    const neutralPrompt = `Write neutral professional interview preparation content in JSON format. Candidate: ${shortFacts}. Role: ${role} at ${company}. Job posting: ${posting || 'not provided'}. Keys: starExamples (array of objects with title, situation, task, action, result), likelyQuestions (array), talkingPoints (array), questionsToAsk (array). Return only JSON. ${directive}`;
-    text = await callLLM(neutralPrompt, 'You are a helpful assistant. Return JSON only. ' + directive, { maxTokens: 3000 });
+    const neutralPrompt = `Write neutral professional interview preparation content in JSON format. Candidate: ${shortFacts}. Role: ${role} at ${company}. Job posting: ${posting || 'not provided'}. Every item needs a concrete worked example. Keys: starExamples (array of objects with title, situation, task, action, result — full stories), likelyQuestions (array of objects with question and exampleAnswer), talkingPoints (array of objects with point and example), questionsToAsk (array of objects with question and example). Return only JSON. ${directive}`;
+    text = await callLLM(neutralPrompt, 'You are a helpful assistant. Return JSON only. ' + directive, { maxTokens: 4000 });
   }
   const data = parseLLMJson(text);
-  const list = value => Array.isArray(value) ? value.map(v => String(v).trim()).filter(Boolean) : [];
   const stars = Array.isArray(data.starExamples) ? data.starExamples.map(s => ({
     title: String(s.title || localizedTitle(language)),
     situation: String(s.situation || ''),
@@ -411,9 +637,140 @@ async function aiInterviewPrep(profile, company, role, posting, language) {
     company,
     role,
     starExamples: stars,
-    likelyQuestions: list(data.likelyQuestions),
-    talkingPoints: list(data.talkingPoints),
-    questionsToAsk: list(data.questionsToAsk),
+    likelyQuestions: prepExampleList(data.likelyQuestions, 'question', 'exampleAnswer'),
+    talkingPoints: prepExampleList(data.talkingPoints, 'point', 'example'),
+    questionsToAsk: prepExampleList(data.questionsToAsk, 'question', 'example'),
+    source: 'ai',
+  };
+}
+
+/** Normalize free-form custom questions from the Interview Prep page. */
+function normalizeCustomQuestions(value) {
+  const raw = Array.isArray(value) ? value : String(value || '').split(/\r?\n/);
+  const seen = new Set();
+  return raw
+    .map(q => String(q || '').replace(/^\s*(?:\d+[.)]|[-*])\s*/, '').trim())
+    .filter(q => q && !seen.has(q) && seen.add(q))
+    .slice(0, 20)
+    .map(q => q.slice(0, 500));
+}
+
+/** Local (no-AI) answer coaching for one candidate-supplied question. */
+function customAnswerFallback(profile, question, role, language = 'en') {
+  const q = String(question || '').toLowerCase();
+  const exps = Array.isArray(profile?.experience) ? profile.experience : [];
+  const top = exps[0] || {};
+  const skills = Array.isArray(profile?.skills?.primary) ? profile.skills.primary : [];
+  const behavioral = /tell me about|describe (a|your)|time when|example|challeng|conflict|difficult|stakeholder|failure|success|เล่า|อธิบาย|ครั้ง|สถานการณ์|ความขัดแย้ง|请讲|请描述|讲一次|描述一次|经历|挑战|冲突/i.test(q);
+  const technical = /^(how|why|what)\b/.test(q) || /technical|design|architecture|system|code|data|sql|python|debug|trade.?off|เทคนิค|ออกแบบ|ระบบ|โค้ด|ข้อมูล|ดีบัก|技术|设计|架构|系统|代码|数据|调试|如何|怎样/i.test(q);
+
+  const approach = behavioral
+    ? localText(language, 'cfApproachBehavioral')
+    : technical
+      ? localText(language, 'cfApproachTechnical')
+      : localText(language, 'cfApproachGeneral');
+
+  const talkingPoints = [];
+  if (skills.length) talkingPoints.push(localText(language, 'cfAnchorSkills', { skills: skills.slice(0, 3).join(', ') }));
+  if (top.title || top.company) {
+    talkingPoints.push(localText(language, 'cfUseExperience', {
+      title: top.title || localText(language, 'cfRoleFallback'),
+      company: top.company || localText(language, 'cfCompanyFallback'),
+    }));
+  }
+  if (role) talkingPoints.push(localText(language, 'cfConnectRole', { role }));
+  if (!talkingPoints.length) talkingPoints.push(localText(language, 'cfChooseProject'));
+
+  const example = (top.title || top.company)
+    ? localText(language, 'cfExampleFromRole', {
+        title: top.title || localText(language, 'cfRoleFallback'),
+        company: top.company || localText(language, 'cfCompanyFallback'),
+      })
+    : localText(language, 'cfExampleGeneric');
+
+  return {
+    question: String(question || ''),
+    approach,
+    talkingPoints,
+    example,
+    pitfalls: [
+      localText(language, 'cfPitfall1'),
+      localText(language, 'cfPitfall2'),
+      localText(language, 'cfPitfall3'),
+    ],
+  };
+}
+
+/** Build the full custom-question prep pack without an LLM. */
+function customLocalPrep(profile, questions, company, role, language = 'en', warning) {
+  return {
+    mode: 'custom',
+    questions,
+    company,
+    role,
+    answers: questions.map(q => customAnswerFallback(profile, q, role, language)),
+    starExamples: generateSTARExamples(profile, company, role, '', language),
+    talkingPoints: generateTalkingPoints(profile, role, '', language),
+    questionsToAsk: (company || role) ? generateQuestionsToAsk(company, role, '', language) : [],
+    source: 'local',
+    ...(warning ? { warning } : {}),
+  };
+}
+
+/** AI prep pack for questions typed by the candidate instead of a tracker job. */
+async function aiCustomInterviewPrep(profile, questions, company, role, language) {
+  const directive = languageDirective(language);
+  const system = 'You are an experienced interview coach. Coach only the candidate-provided questions. Base everything strictly on the candidate profile. Never invent metrics, employers, or experience. Every item must include a concrete worked example, never just an idea or a fill-in prompt. Return JSON only, with keys: answers (array of objects with question, approach, talkingPoints (array of objects with point and example), example (a complete sample answer), pitfalls (array of objects with pitfall and example)), starExamples (array of objects with title, situation, task, action, result — full stories), talkingPoints (array of objects with point and example), questionsToAsk (array of objects with question and example). ' + directive;
+  const questionList = questions.map((q, i) => `${i + 1}. ${q}`).join('\n');
+  const prompt = `Candidate profile (JSON):\n${compactProfileFacts(profile)}\n\nCompany: ${company || '(not provided)'}\nRole: ${role || '(not provided)'}\n\nCandidate's questions:\n${questionList}\n\nCreate a prep pack for these exact questions. For each one, produce an object in "answers" with: "question" copied verbatim, "approach" (how to structure the answer), "talkingPoints" (3-4 objects with a point and a concrete example from the profile), "example" (a complete 60-90 second sample answer written as if the candidate were speaking — never a prompt or outline; use [verified metric] only if a number is genuinely missing), "pitfalls" (2-3 objects with a pitfall and a concrete example of what that mistake sounds like). Also include 2-4 "starExamples" with fully written stories and 4-6 general "talkingPoints" with point and example from the same profile. Include "questionsToAsk" only when a company or role was provided; otherwise return an empty array. Return only JSON.\n\n${directive}`;
+
+  let text;
+  try {
+    text = await callLLM(prompt, system, { maxTokens: 6000 });
+  } catch (e) {
+    if (!/contentFilter|1301|HTTP 400/i.test(e.message)) throw e;
+    const shortFacts = JSON.stringify({
+      name: profile.identity?.name || '',
+      location: profile.identity?.location || '',
+      skills: profile.skills || {},
+      roles: (profile.experience || []).map(x => `${x.title || ''} at ${x.company || ''}`).filter(Boolean),
+      targetRoles: profile.careerGoals?.targetRoles || [],
+    });
+    const neutralPrompt = `Write neutral professional interview coaching content in JSON format. Candidate: ${shortFacts}. Questions: ${questionList}. Every item needs a concrete worked example. Keys: answers (array of objects with question, approach, talkingPoints (objects with point and example), example (full sample answer), pitfalls (objects with pitfall and example)), starExamples (full-story objects), talkingPoints (objects with point and example), questionsToAsk (objects with question and example). Return only JSON. ${directive}`;
+    text = await callLLM(neutralPrompt, 'You are a helpful assistant. Return JSON only. ' + directive, { maxTokens: 4500 });
+  }
+
+  const data = parseLLMJson(text);
+  const byQuestion = new Map();
+  (Array.isArray(data.answers) ? data.answers : []).forEach((a, i) => {
+    const question = String(a?.question || questions[i] || '').trim();
+    if (!question) return;
+    byQuestion.set(question, {
+      question,
+      approach: String(a.approach || ''),
+      talkingPoints: prepExampleList(a.talkingPoints, 'point', 'example'),
+      example: String(a.example || ''),
+      pitfalls: prepExampleList(a.pitfalls, 'pitfall', 'example'),
+    });
+  });
+  const answers = questions.map(q => byQuestion.get(q) || customAnswerFallback(profile, q, role, language));
+  const stars = Array.isArray(data.starExamples) ? data.starExamples.map(s => ({
+    title: String(s.title || localizedTitle(language)),
+    situation: String(s.situation || ''),
+    task: String(s.task || ''),
+    action: String(s.action || ''),
+    result: String(s.result || ''),
+  })) : [];
+
+  return {
+    mode: 'custom',
+    questions,
+    company,
+    role,
+    answers,
+    starExamples: stars,
+    talkingPoints: prepExampleList(data.talkingPoints, 'point', 'example'),
+    questionsToAsk: (company || role) ? prepExampleList(data.questionsToAsk, 'question', 'example') : [],
     source: 'ai',
   };
 }
@@ -2242,6 +2599,23 @@ api['POST /api/interview-prep'] = async (req, res, body) => {
   const { company, role, posting } = body;
   const language = body.language || 'en';
 
+  // Candidate-supplied questions: same feature, different prep source.
+  if (body.mode === 'custom') {
+    const questions = normalizeCustomQuestions(body.questions);
+    if (!questions.length) return sendJSON(res, 400, { ok: false, error: localText(language, 'enterQuestion') });
+    const customCompany = String(company || '').trim();
+    const customRole = String(role || '').trim();
+    if (llmConfigured()) {
+      try {
+        return sendJSON(res, 200, await aiCustomInterviewPrep(profile, questions, customCompany, customRole, language));
+      } catch (e) {
+        console.error('AI custom interview prep failed, using local logic:', e.message);
+        return sendJSON(res, 200, customLocalPrep(profile, questions, customCompany, customRole, language, e.message));
+      }
+    }
+    return sendJSON(res, 200, customLocalPrep(profile, questions, customCompany, customRole, language));
+  }
+
   if (llmConfigured()) {
     try {
       const prep = await aiInterviewPrep(profile, company, role, posting, language);
@@ -2251,10 +2625,10 @@ api['POST /api/interview-prep'] = async (req, res, body) => {
       const prep = {
         company,
         role,
-        starExamples: generateSTARExamples(profile, company, role, posting),
-        likelyQuestions: generateLikelyQuestions(role, posting, profile),
-        talkingPoints: generateTalkingPoints(profile, role, posting),
-        questionsToAsk: generateQuestionsToAsk(company, role, posting),
+        starExamples: generateSTARExamples(profile, company, role, posting, language),
+        likelyQuestions: generateLikelyQuestions(role, posting, profile, language),
+        talkingPoints: generateTalkingPoints(profile, role, posting, language),
+        questionsToAsk: generateQuestionsToAsk(company, role, posting, language),
         source: 'local',
         warning: e.message,
       };
@@ -2265,10 +2639,10 @@ api['POST /api/interview-prep'] = async (req, res, body) => {
   const prep = {
     company,
     role,
-    starExamples: generateSTARExamples(profile, company, role, posting),
-    likelyQuestions: generateLikelyQuestions(role, posting, profile),
-    talkingPoints: generateTalkingPoints(profile, role, posting),
-    questionsToAsk: generateQuestionsToAsk(company, role, posting),
+    starExamples: generateSTARExamples(profile, company, role, posting, language),
+    likelyQuestions: generateLikelyQuestions(role, posting, profile, language),
+    talkingPoints: generateTalkingPoints(profile, role, posting, language),
+    questionsToAsk: generateQuestionsToAsk(company, role, posting, language),
     source: 'local',
   };
 
@@ -2282,31 +2656,50 @@ api['POST /api/interview-prep'] = async (req, res, body) => {
  * and Tasks from the candidate's own work history and leave Actions/Results
  * as focused fill-in prompts that reference the actual posting requirements.
  */
-function generateSTARExamples(profile, company, role, posting) {
-  const postText = String(posting || '').toLowerCase();
+function generateSTARExamples(profile, company, role, posting, language = 'en') {
   const exps = profile.experience || [];
   const skills = (profile.skills?.primary || []);
-  const behav = profile.behavioral || {};
   const prebuilt = Array.isArray(profile.starExamples) ? profile.starExamples : [];
 
-  // If the user has already filled in their own STAR stories, use them directly.
+  // If the user has already filled in their own STAR stories, use them verbatim.
   if (prebuilt.length > 0) return prebuilt.map(s => ({
-    title: s.title || 'Key Achievement',
+    title: s.title || localText(language, 'starKeyAchievement'),
     situation: s.situation || '',
     task: s.task || '',
     action: s.action || '',
     result: s.result || '',
   }));
 
-  // Derive situations/tasks from real experience, using posting keywords where possible.
-  return exps.slice(0, 4).map((exp, i) => {
+  // Derive situations/tasks from real experience and localize the scaffolding.
+  return exps.slice(0, 4).map(exp => {
     const topBullet = (exp.bullets || exp.responsibilities || [])[0] || '';
+    const detail = topBullet
+      ? `${String(topBullet).slice(0, 80)}${String(topBullet).length > 80 ? '…' : ''}`
+      : localText(language, 'starSituationNoDetail');
+    let task;
+    if (exp.location) {
+      task = skills.length
+        ? localText(language, 'starTaskWithLocationSkills', {
+            location: exp.location,
+            skills: skills.slice(0, 2).join(language === 'cn' ? '、' : language === 'th' ? ' และ ' : ' and '),
+          })
+        : localText(language, 'starTaskWithLocation', { location: exp.location });
+    } else {
+      task = localText(language, 'starTaskNoLocation');
+    }
     return {
-      title: `${exp.title || 'Project'} at ${exp.company || 'Company'}`,
-      situation: `As a ${exp.title || 'professional'} at ${exp.company || 'my organization'}, responsible for ${topBullet.replace(/[^a-zA-Z ]/g, '').slice(0, 80)}${topBullet ? '…' : 'key operations'}.`,
-      task: exp.location ? `Balance delivery across ${exp.location}${skills.length ? ' while applying ' + skills.slice(0, 2).join(' and ') : ''}` : `Deliver on core KPIs including throughput, quality, cost control, and stakeholder satisfaction.`,
-      action: `Outline the specific decisions, tools, frameworks, and cross-functional coordination you used. Reference a measurable metric if possible.`,
-      result: `Quantify the outcome — revenue, headcount, SLA improvement, cycle-time reduction, or customer retention — and state what you changed for future iterations.`,
+      title: localText(language, 'starTitle', {
+        title: exp.title || localText(language, 'starProfessional'),
+        company: exp.company || localText(language, 'starCompany'),
+      }),
+      situation: localText(language, 'starSituation', {
+        title: exp.title || localText(language, 'starProfessional'),
+        company: exp.company || localText(language, 'starCompany'),
+        detail,
+      }),
+      task,
+      action: localText(language, 'starAction'),
+      result: localText(language, 'starResult'),
     };
   });
 }
@@ -2317,7 +2710,7 @@ function generateSTARExamples(profile, company, role, posting) {
  *  (2) behavior-based questions tailored by seniority signal,
  *  (3) universal opening/closing. This replaces the previous hardcoded list.
  */
-function generateLikelyQuestions(role, posting, profile) {
+function generateLikelyQuestions(role, posting, profile, language = 'en') {
   const roleLower = String(role || '').toLowerCase();
   const postLower = String(posting || '').toLowerCase();
 
@@ -2328,37 +2721,24 @@ function generateLikelyQuestions(role, posting, profile) {
   ]);
 
   const q = new Set();
+  const t = (key, vars) => localText(language, key, vars);
 
   // Universal anchors.
-  q.add('Tell me about yourself and why this role at our company matters to you right now.');
-  q.add('Why do you want to work here rather than a peer company?');
-  q.add('What strengths make you confident you can deliver in this role from day one?');
-  q.add('Describe a challenging project or situation and how you navigated it.');
-  q.add('Where do you see yourself professionally in three to five years?');
-  q.add('What motivates you most and what drains your energy?');
-  q.add('What do you know about our products, market position, or recent initiatives?');
-  q.add("I'd like to hear about a time you worked with a difficult colleague or stakeholder.");
-  q.add('What are your salary expectations for this level?');
-  q.add("Is there anything we have not covered that you would like me to know?");
+  ['qIntro', 'qWhyHere', 'qStrengths', 'qChallenge', 'qFiveYears', 'qMotivation', 'qCompanyKnowledge', 'qDifficultColleague', 'qSalary', 'qAnythingElse']
+    .forEach(key => q.add(t(key)));
 
   // Posting-driven questions.
   if (keyTerms.size > 0) {
-    const sampled = [...new Set([...keyTerms].slice(0, 5))];
-    q.add(`How have you applied ${sampled.join(' / ')} in your recent roles?`);
-    q.add('Which of the core competencies listed in this posting do you feel strongest against, and where might you need support early on?');
+    q.add(t('qAppliedSkills', { skills: [...new Set([...keyTerms].slice(0, 5))].join(' / ') }));
+    q.add(t('qCoreCompetencies'));
   }
 
   // Seniority-specific.
   if (/manager|lead|head|director|principal|senior/i.test(roleLower)) {
-    q.add('How do you handle conflict or underperformance within your team?');
-    q.add('Describe your management and delegation style with a concrete example.');
-    q.add('When priorities collide, how do you decide what to defer?');
-    q.add('How do you align a team around a ambiguous or evolving goal?');
+    ['qConflictTeam', 'qManagementStyle', 'qPriorities', 'qAmbiguousGoal'].forEach(key => q.add(t(key)));
   }
   if (/engineer|developer|data|analyst|scientist|architect/i.test(roleLower)) {
-    q.add('Walk me through a technical decision you made recently and why.');
-    q.add('How do you balance shipping fast against code quality and maintainability?');
-    q.add('Tell me about a time you mentored someone or raised the bar for the team.');
+    ['qTechDecision', 'qSpeedVsQuality', 'qMentor'].forEach(key => q.add(t(key)));
   }
 
   return [...q];
@@ -2367,34 +2747,34 @@ function generateLikelyQuestions(role, posting, profile) {
 /**
  * Talking points built from the candidate's own evidence — not generic filler.
  */
-function generateTalkingPoints(profile, role, posting) {
+function generateTalkingPoints(profile, role, posting, language = 'en') {
   const skills = profile.skills || { primary: [], domain: [] };
   const exps = profile.experience || [];
   const behav = profile.behavioral || {};
   const topExp = exps[0] || {};
   const goals = profile.careerGoals || {};
+  const t = (key, vars) => localText(language, key, vars);
 
   const items = [];
   if (skills.primary.length) {
-    items.push(`${skills.primary.slice(0, 4).join(', ')} — how each maps to a requirement in this posting`);
+    items.push(t('tpSkills', { skills: skills.primary.slice(0, 4).join(', ') }));
   }
   if (topExp.title && topExp.company) {
-    items.push(`My background as a ${topExp.title} at ${topExp.company}: ${((topExp.bullets || [])[0] || 'consistent delivery').replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 100)}`);
+    const detail = ((topExp.bullets || [])[0] || t('tpDetailFallback')).slice(0, 100);
+    items.push(t('tpBackground', { title: topExp.title, company: topExp.company, detail }));
   }
   if (skills.domain.length) {
-    items.push(`Domain depth in ${skills.domain.slice(0, 2).join(', ')} — relevant because this role operates at that intersection`);
+    items.push(t('tpDomain', { skills: skills.domain.slice(0, 2).join(', ') }));
   }
   if (goals.targetRoles?.length) {
-    items.push(`Career trajectory: moving toward ${goals.targetRoles.slice(0, 2).join(' / ')}, which is why this next step makes sense now`);
+    items.push(t('tpCareer', { roles: goals.targetRoles.slice(0, 2).join(' / ') }));
   }
   if (behav.strengths?.length) {
-    items.push(`Recurring strengths I bring: ${behav.strengths.slice(0, 3).join(', ')}`);
+    items.push(t('tpStrengths', { strengths: behav.strengths.slice(0, 3).join(', ') }));
   }
   // Fallback when the profile is thin.
   if (!items.length) {
-    items.push('Core competencies that match the posting');
-    items.push('Two or three measurable wins from my most recent role');
-    items.push('Why I am motivated to join this company specifically');
+    items.push(t('tpFallback1'), t('tpFallback2'), t('tpFallback3'));
   }
   return items;
 }
@@ -2402,27 +2782,23 @@ function generateTalkingPoints(profile, role, posting) {
 /**
  * Questions the candidate should ask — tied to company/role, not boilerplate.
  */
-function generateQuestionsToAsk(company, role, posting) {
+function generateQuestionsToAsk(company, role, posting, language = 'en') {
   const postLower = String(posting || '').toLowerCase();
+  const t = (key, vars) => localText(language, key, vars);
   const qs = [
-    `What does success look like in the first six to twelve months for a ${role}?`,
-    "Who will I report to and how is the team structured?",
-    `What are the biggest blockers the person in this role will face in quarter one?`,
-    'How does the company invest in growth and internal mobility?',
-    "What does the onboarding and ramp-up path look like?",
-    'What are the next steps and timeline in the process?',
+    t('aqSuccess', { role: role || t('starProfessional') }),
+    t('aqReporting'),
+    t('aqBlockers'),
+    t('aqGrowth'),
+    t('aqOnboarding'),
+    t('aqNextSteps'),
   ];
 
   // Tailor follow-ups based on what appears in the posting.
-  if (/remote|hybrid|flex/i.test(postLower)) {
-    qs.push("How does the team collaborate asynchronously versus synchronously?");
-  }
-  if (/scale|growth|fast.?moving/i.test(postLower)) {
-    qs.push('What stage of scaling is the org in, and what has been the hardest lesson so far?');
-  }
+  if (/remote|hybrid|flex/i.test(postLower)) qs.push(t('aqAsync'));
+  if (/scale|growth|fast.?moving/i.test(postLower)) qs.push(t('aqScaling'));
   if (/lead|manager|head/i.test(String(role || '').toLowerCase())) {
-    qs.push('How are performance reviews and promotions handled here?');
-    qs.push('What autonomy does this role have over hiring and budget?');
+    qs.push(t('aqReviews'), t('aqAutonomy'));
   }
 
   return qs;

@@ -11,7 +11,7 @@ sample page : https://jobsearch-ai-z1t8.onrender.com/login
 - **Salary Lookup** — Fuzzy company search with benchmark indices across Asia-Pacific markets
 - **Application Tracker** — CRUD pipeline from Draft → Active → Interview → Offer → Hired/Rejected
 - **LaTeX CV & Cover Letter** — Generate professional documents automatically
-- **Interview Prep** — STAR examples, likely questions, talking points
+- **Interview Prep** — STAR examples, likely questions, talking points; build a prep pack from a tracker job or from your own typed questions
 - **Resume Analysis** — Upload PDF/DOCX/TXT to auto-fill profile fields
 - **Multi-language UI** — English, Thai, Chinese interface
 

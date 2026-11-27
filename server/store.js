@@ -184,6 +184,7 @@ function writeUsers(users) {
         plan: user.plan || 'free',
         passwordHash: user.passwordHash || user.password_hash || '',
         createdAt: user.createdAt || user.created_at || nowIso(),
+        loginId: user.loginId || user.login_id || '',
       });
     });
   });

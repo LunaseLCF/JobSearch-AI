@@ -73,8 +73,8 @@ const PLANS = {
   },
   team: {
     label: 'Team',
-    features: { resumeParse: true, aiTailoring: true, aiInterview: true, llmConfig: true, repo: true, exports: true },
-    limits: { resumeParse: 5000, aiTailoring: 3000, aiInterview: 3000, llmConfig: 1000, repo: 5000, exports: 3000 },
+    features: { resumeParse: true, aiTailoring: true, aiInterview: true, llmConfig: false, repo: false, exports: true },
+    limits: { resumeParse: 5000, aiTailoring: 3000, aiInterview: 3000, llmConfig: 0, repo: 0, exports: 3000 },
   },
   owner: {
     label: 'Owner',
@@ -97,6 +97,9 @@ const ROUTE_RULES = {
   'POST /api/generate-cover-letter': 'exports',
   'POST /api/html-report': 'exports',
 };
+
+// These features are visible and usable only by the owner account.
+const OWNER_ONLY_FEATURES = new Set(['llmConfig', 'repo']);
 
 const PUBLIC_ROUTES = new Set([
   'POST /api/auth/register',
@@ -348,6 +351,9 @@ function authorize(req, routeKey) {
   const feature = ROUTE_RULES[routeKey];
   if (!feature) return { ok: true };
   const plan = user.plan || 'free';
+  if (OWNER_ONLY_FEATURES.has(feature) && plan !== 'owner') {
+    return { ok: false, status: 403, error: 'Owner access required', code: 'OWNER_REQUIRED', feature, plan, requiredPlan: 'owner' };
+  }
   if (!PLANS[plan]?.features?.[feature]) {
     const requiredPlan = suggestPlanFor(feature).toLowerCase();
     return { ok: false, status: 403, error: `This feature requires the ${suggestPlanFor(feature)} plan`, code: 'PLAN_REQUIRED', feature, plan, requiredPlan };
@@ -360,7 +366,7 @@ function authorize(req, routeKey) {
 }
 
 function suggestPlanFor(feature) {
-  if (feature === 'repo') return 'Team';
+  if (OWNER_ONLY_FEATURES.has(feature)) return 'Owner';
   return 'Pro';
 }
 
@@ -404,7 +410,9 @@ function logoutUser(req) {
 function entitlementsFor(user) {
   const plan = user?.plan || 'free';
   const definition = PLANS[plan] || PLANS.free;
-  return { plan, label: definition.label, features: { ...definition.features } };
+  const features = { ...definition.features };
+  if (plan !== 'owner') OWNER_ONLY_FEATURES.forEach(feature => { features[feature] = false; });
+  return { plan, label: definition.label, features };
 }
 
 function runWithUser(userId, callback) {

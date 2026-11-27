@@ -72,7 +72,7 @@
       <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--stroke)">
         <p style="color:var(--muted);font-size:var(--fs-11);margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em">Tools</p>
         <ul class="nav-items nav-secondary">
-          <li><button class="nav-item" data-page="repo" type="button">
+          <li id="repo-nav-item" hidden><button class="nav-item" data-page="repo" type="button">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             <span>Repo Browser</span>
           </button></li>
@@ -80,7 +80,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span>HTML Report</span>
           </button></li>
-          <li><button class="nav-item" data-page="llm-config" type="button">
+          <li id="llm-config-nav-item" hidden><button class="nav-item" data-page="llm-config" type="button">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.364-6.364l-4.243 4.243m-4.242 0L4.636 5.636m12.728 12.728l-4.243-4.243m-4.242 0L4.636 18.364"/></svg>
             <span>LLM Config</span>
           </button></li>
@@ -106,7 +106,7 @@
           </div>
           <button class="btn btn-secondary btn-sm" onclick="logoutUser()">Log out</button>
         </div>
-        <div class="profile-status" id="profile-status">
+        <div class="profile-status" id="sidebar-profile-status">
           <div class="status-ring" id="status-ring"></div>
           <span>Profile: <span id="profile-pct">0%</span></span>
         </div>
@@ -142,11 +142,11 @@
     </div>
   </div>
 
-  <script src="/js/i18n.js"></script>
+  <script src="/js/i18n.js?v=1795756736"></script>
   <script>
     // Set the saved language before the app renders its first page.
     if (window.initI18n) initI18n();
   </script>
-  <script src="/js/app.js?v=1795530815"></script>
+  <script src="/js/app.js?v=1795756736"></script>
 </body>
 </html>

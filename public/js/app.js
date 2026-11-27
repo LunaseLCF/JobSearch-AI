@@ -54,16 +54,19 @@ const PUBLIC_PAGES = new Set([
   'dashboard', 'search', 'evaluate', 'tracker', 'salary', 'profile', 'queries'
 ]);
 
+const OWNER_ONLY_FEATURES = new Set(['owner', 'repo', 'llmConfig']);
+
 function can(feature) {
-  if (feature === 'owner') return isOwner();
+  // Owner-only pages must not rely on plan entitlements alone.
+  if (OWNER_ONLY_FEATURES.has(feature)) return isOwner();
   // If no feature required for this page, allow access
   if (!feature) return true;
   return !!(entitlements && entitlements.features && entitlements.features[feature]);
 }
 
 function requiredPlanFor(feature) {
-  if (feature === 'owner') return 'Owner';
-  return feature === 'repo' || feature === 'llmConfig' ? 'Team' : 'Pro';
+  if (OWNER_ONLY_FEATURES.has(feature)) return 'Owner';
+  return 'Pro';
 }
 
 function showUpgradeNotice(feature) {
@@ -110,8 +113,11 @@ function applyAccessRules() {
     item.classList.toggle('nav-locked', !allowed);
     item.title = allowed ? '' : `Requires ${requiredPlanFor(feature)} plan`;
   });
-  const adminNav = document.getElementById('admin-nav-item');
-  if (adminNav) adminNav.hidden = !isOwner();
+  // Owner-only tools should not be visible at all to other levels.
+  ['repo-nav-item', 'llm-config-nav-item', 'admin-nav-item'].forEach(id => {
+    const nav = document.getElementById(id);
+    if (nav) nav.hidden = !isOwner();
+  });
 }
 
 function renderPage() {
@@ -1438,7 +1444,11 @@ function prepForInterview(id) {
   API.get('tracker').then(tracker => {
     const t = tracker[id];
     if (!t) return;
-    // Navigate to interview page and activate the nav item.
+    // Navigate to the tracker-based tab of Interview Prep.
+    interviewMode = 'job';
+    interviewDraft.company = t.company || '';
+    interviewDraft.role = t.role || '';
+    interviewDraft.posting = t.job_posting || '';
     currentPage = 'interview';
     // Activate the Interview Prep sidebar item to match standard navigation behavior.
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1508,17 +1518,52 @@ document.addEventListener('click', event => {
 });
 
 // ============ Interview Prep ============
+let interviewMode = 'job';
+const interviewDraft = {
+  company: '', role: '', posting: '',
+  customQuestions: '', customCompany: '', customRole: '',
+};
+
+const INTERVIEW_FIELDS = {
+  company: 'int-company',
+  role: 'int-role',
+  posting: 'int-posting',
+  customQuestions: 'int-custom-questions',
+  customCompany: 'int-custom-company',
+  customRole: 'int-custom-role',
+};
+
+function saveInterviewDraft() {
+  Object.entries(INTERVIEW_FIELDS).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) interviewDraft[key] = el.value;
+  });
+}
+
+function restoreInterviewDraft() {
+  Object.entries(INTERVIEW_FIELDS).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el && interviewDraft[key]) el.value = interviewDraft[key];
+  });
+}
+
+function switchInterviewMode(mode) {
+  saveInterviewDraft();
+  interviewMode = mode === 'custom' ? 'custom' : 'job';
+  const results = document.getElementById('int-results');
+  if (results) results.innerHTML = '';
+  renderInterview();
+}
+
 async function renderInterview() {
   const tracker = await API.get('tracker');
   const hasEntries = tracker.length > 0;
   const options = hasEntries
     ? tracker.map((t, i) => `<div class="custom-select-option" data-index="${i}" onclick="chooseTrackerOption(${i})">${esc(t.company || '-')}/ ${esc(t.role || '-')} (${esc(t.status || 'drafted')})</div>`).join('')
     : '';
+  const isCustom = interviewMode === 'custom';
 
-  document.getElementById('page-content').innerHTML = `
-    <h1 class="page-title">Interview Preparation</h1>
-    <p class="page-subtitle">Generate stage-specific prep pack: STAR examples, likely questions, talking points</p>
-
+  const jobForm = `
     <div class="card">
       <div class="form-group">
         <label>Select from Tracker (optional)</label>
@@ -1541,35 +1586,107 @@ async function renderInterview() {
         <label>Job Posting (optional, for tailored questions)</label>
         <textarea class="form-textarea" id="int-posting" rows="6" placeholder="Paste the job posting text..."></textarea>
       </div>
-      <button class="btn btn-primary" onclick="generateInterviewPrep()">Generate Prep Pack</button>
+      <button class="btn btn-primary" onclick="generateInterviewPrep()">${escapeHtml(tr('Generate Prep Pack'))}</button>
+    </div>
+  `;
+
+  const customForm = `
+    <div class="card">
+      <div class="form-group">
+        <label>${escapeHtml(tr('Your Questions (one per line)'))}</label>
+        <textarea class="form-textarea" id="int-custom-questions" rows="7" placeholder="${escapeHtml(tr('Type your questions, one per line. Example: Tell me about a time you handled a difficult stakeholder.'))}"></textarea>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">${escapeHtml(tr('We will use your profile to build a tailored prep pack for each question.'))}</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="form-group"><label>${escapeHtml(tr('Company (optional)'))}</label><input type="text" class="form-input" id="int-custom-company" placeholder="e.g. Acme Corp"></div>
+        <div class="form-group"><label>${escapeHtml(tr('Role (optional)'))}</label><input type="text" class="form-input" id="int-custom-role" placeholder="e.g. Senior Data Scientist"></div>
+      </div>
+      <button class="btn btn-primary" onclick="generateCustomInterviewPrep()">${escapeHtml(tr('Generate Prep Pack'))}</button>
+    </div>
+  `;
+
+  document.getElementById('page-content').innerHTML = `
+    <h1 class="page-title">Interview Preparation</h1>
+    <p class="page-subtitle">Generate stage-specific prep pack: STAR examples, likely questions, talking points</p>
+
+    <div class="tabs">
+      <button type="button" class="tab ${isCustom ? '' : 'active'}" onclick="switchInterviewMode('job')">${escapeHtml(tr('Job / Tracker'))}</button>
+      <button type="button" class="tab ${isCustom ? 'active' : ''}" onclick="switchInterviewMode('custom')">${escapeHtml(tr('Custom Questions'))}</button>
     </div>
 
+    ${isCustom ? customForm : jobForm}
     <div id="int-results"></div>
   `;
+  restoreInterviewDraft();
 }
 
-async function generateInterviewPrep() {
-  const company = document.getElementById('int-company').value.trim();
-  const role = document.getElementById('int-role').value.trim();
-  const posting = document.getElementById('int-posting').value.trim();
+function renderPrepError(resultsDiv, error) {
+  resultsDiv.innerHTML = `<div class="alert alert-warning">${escapeHtml(error.message || String(error))}</div>`;
+}
 
-  if (!company || !role) return;
+/** Prep items may be legacy strings or { text, example } objects. */
+function prepItemText(item) {
+  return typeof item === 'string' ? item : String(item?.text || '');
+}
 
+function prepExampleHtml(item) {
+  const example = typeof item === 'string' ? '' : String(item?.example || '');
+  if (!example) return '';
+  return `<div style="font-size:12px;color:var(--muted);margin-top:4px;padding-left:10px;border-left:2px solid var(--stroke)"><strong>${escapeHtml(tr('Example'))}:</strong> ${escapeHtml(example)}</div>`;
+}
+
+function renderPrepPack(prep, options = {}) {
   const resultsDiv = document.getElementById('int-results');
-  resultsDiv.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:20px"><div class="loader"></div> Building prep pack...</div>';
-
-  const language = currentUILanguage();
-  const prep = await API.post('interview-prep', { company, role, posting, language });
+  if (!resultsDiv) return;
+  const custom = !!options.custom;
   const sourceBadge = prep.source === 'ai'
     ? '<span class="badge badge-active" style="margin-left:8px">AI</span>'
-    : (prep.warning ? `<span class="badge badge-rejected" style="margin-left:8px">Local fallback: ${escapeHtml(prep.warning)}</span>` : '');
-  const localLanguageNotice = prep.source !== 'ai' && language !== 'en'
-    ? `<div class="alert alert-warning" style="margin-bottom:12px">${escapeHtml(tr('Local template content is in English. Configure a working AI model to generate content in the selected language.'))}</div>`
-    : '';
+    : (prep.warning ? `<span class="badge badge-rejected" style="margin-left:8px">${escapeHtml(tr('Local fallback:'))} ${escapeHtml(prep.warning)}</span>` : '');
 
-  resultsDiv.innerHTML = `${localLanguageNotice}
+  const answersHtml = custom ? `
     <div class="card">
-      <div class="card-title">STAR Examples ${sourceBadge}</div>
+      <div class="card-title">${escapeHtml(tr('Your Questions & Suggested Answers'))} ${sourceBadge}</div>
+      ${(prep.answers || []).map((a, i) => `
+        <div style="padding:12px;border:1px solid var(--stroke);border-radius:8px;margin-bottom:10px">
+          <strong>${i + 1}. ${escapeHtml(a.question)}</strong>
+          ${a.approach ? `<div style="font-size:13px;margin-top:6px"><strong>${escapeHtml(tr('Approach'))}:</strong> ${escapeHtml(a.approach)}</div>` : ''}
+          ${(a.talkingPoints || []).length ? `<div style="font-size:13px;margin-top:6px"><strong>${escapeHtml(tr('Talking points'))}:</strong><ul style="padding-left:20px;margin:4px 0">${a.talkingPoints.map(t => `<li>${escapeHtml(prepItemText(t))}${prepExampleHtml(t)}</li>`).join('')}</ul></div>` : ''}
+          ${a.example ? `<div style="font-size:13px;margin-top:6px"><strong>${escapeHtml(tr('Example'))}:</strong> ${escapeHtml(a.example)}</div>` : ''}
+          ${(a.pitfalls || []).length ? `<div style="font-size:13px;margin-top:6px"><strong>${escapeHtml(tr('Watch out for'))}:</strong><ul style="padding-left:20px;margin:4px 0">${a.pitfalls.map(p => `<li>${escapeHtml(prepItemText(p))}${prepExampleHtml(p)}</li>`).join('')}</ul></div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  const likelyQuestionsHtml = custom ? '' : `
+    <div class="card">
+      <div class="card-title">${escapeHtml(tr('Likely Interview Questions'))}</div>
+      <ol style="font-size:14px;padding-left:20px">
+        ${(prep.likelyQuestions || []).map(q => `<li style="margin-bottom:10px">${escapeHtml(prepItemText(q))}${prepExampleHtml(q)}</li>`).join('')}
+      </ol>
+    </div>
+  `;
+  const talkingPointsHtml = (!custom || (prep.talkingPoints || []).length) ? `
+    <div class="card">
+      <div class="card-title">${escapeHtml(tr('Talking Points'))}</div>
+      <ul style="font-size:14px;padding-left:20px">
+        ${(prep.talkingPoints || []).map(t => `<li style="margin-bottom:10px">${escapeHtml(prepItemText(t))}${prepExampleHtml(t)}</li>`).join('')}
+      </ul>
+    </div>
+  ` : '';
+  const questionsToAskHtml = (!custom || (prep.questionsToAsk || []).length) ? `
+    <div class="card">
+      <div class="card-title">${escapeHtml(tr('Questions to Ask the Interviewer'))}</div>
+      <ul style="font-size:14px;padding-left:20px">
+        ${(prep.questionsToAsk || []).map(q => `<li style="margin-bottom:10px">${escapeHtml(prepItemText(q))}${prepExampleHtml(q)}</li>`).join('')}
+      </ul>
+    </div>
+  ` : '';
+
+  resultsDiv.innerHTML = `
+    ${answersHtml}
+    <div class="card">
+      <div class="card-title">${escapeHtml(tr('STAR Examples'))} ${custom ? '' : sourceBadge}</div>
       ${(prep.starExamples || []).map(s => `
         <div style="padding:12px;border:1px solid var(--stroke);border-radius:8px;margin-bottom:8px">
           <strong>${escapeHtml(s.title)}</strong>
@@ -1581,27 +1698,53 @@ async function generateInterviewPrep() {
       `).join('')}
     </div>
 
-    <div class="card">
-      <div class="card-title">Likely Interview Questions</div>
-      <ol style="font-size:14px;padding-left:20px">
-        ${(prep.likelyQuestions || []).map(q => `<li style="margin-bottom:6px">${escapeHtml(q)}</li>`).join('')}
-      </ol>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Talking Points</div>
-      <ul style="font-size:14px;padding-left:20px">
-        ${(prep.talkingPoints || []).map(t => `<li style="margin-bottom:6px">${escapeHtml(t)}</li>`).join('')}
-      </ul>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Questions to Ask the Interviewer</div>
-      <ul style="font-size:14px;padding-left:20px">
-        ${(prep.questionsToAsk || []).map(q => `<li style="margin-bottom:6px">${escapeHtml(q)}</li>`).join('')}
-      </ul>
-    </div>
+    ${likelyQuestionsHtml}
+    ${talkingPointsHtml}
+    ${questionsToAskHtml}
   `;
+}
+
+async function generateInterviewPrep() {
+  const company = document.getElementById('int-company').value.trim();
+  const role = document.getElementById('int-role').value.trim();
+  const posting = document.getElementById('int-posting').value.trim();
+
+  if (!company || !role) return;
+
+  const resultsDiv = document.getElementById('int-results');
+  resultsDiv.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:20px"><div class="loader"></div> ${escapeHtml(tr('Building prep pack...'))}</div>`;
+
+  try {
+    const prep = await API.post('interview-prep', {
+      company, role, posting, language: currentUILanguage(),
+    });
+    renderPrepPack(prep, { custom: false });
+  } catch (e) {
+    renderPrepError(resultsDiv, e);
+  }
+}
+
+async function generateCustomInterviewPrep() {
+  const raw = document.getElementById('int-custom-questions')?.value || '';
+  const questions = raw.split(/\r?\n/).map(q => q.trim()).filter(Boolean);
+  if (!questions.length) {
+    tAlert('Enter at least one question.');
+    return;
+  }
+  const company = document.getElementById('int-custom-company')?.value.trim() || '';
+  const role = document.getElementById('int-custom-role')?.value.trim() || '';
+
+  const resultsDiv = document.getElementById('int-results');
+  resultsDiv.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:20px"><div class="loader"></div> ${escapeHtml(tr('Building prep pack for your questions...'))}</div>`;
+
+  try {
+    const prep = await API.post('interview-prep', {
+      mode: 'custom', questions, company, role, language: currentUILanguage(),
+    });
+    renderPrepPack(prep, { custom: true });
+  } catch (e) {
+    renderPrepError(resultsDiv, e);
+  }
 }
 
 // ============ LLM Configuration ============
@@ -2299,6 +2442,13 @@ function removeProfileRow(kind, index) {
   renderProfile();
 }
 
+/** Safe form read: tolerates missing elements, duplicate IDs, and non-input nodes. */
+function formFieldValue(elementId) {
+  const nodes = document.querySelectorAll(`[id="${elementId}"]`);
+  const el = Array.from(nodes).find(node => typeof node.value === 'string');
+  return el ? el.value.trim() : '';
+}
+
 async function saveProfileFromForm() {
   if (!profileData) return;
   const updated = JSON.parse(JSON.stringify(profileData));
@@ -2309,22 +2459,22 @@ async function saveProfileFromForm() {
     cvLanguage: 'profile-cv-language', status: 'profile-status',
   };
   Object.entries(identityMap).forEach(([key, elementId]) => {
-    updated.identity[key] = document.getElementById(elementId)?.value.trim() || '';
+    updated.identity[key] = formFieldValue(elementId);
   });
 
   const split = value => (value || '').split(',').map(s => s.trim()).filter(Boolean);
   updated.skills = updated.skills || {};
   ['primary', 'secondary', 'domain', 'software'].forEach(key => {
-    updated.skills[key] = split(document.getElementById('profile-skills-' + key)?.value);
+    updated.skills[key] = split(formFieldValue('profile-skills-' + key));
   });
 
   updated.languages = Array.from(document.querySelectorAll('[data-lang-name]')).map((el, i) => ({
-    language: el.value.trim(),
+    language: String(el?.value || '').trim(),
     level: document.querySelector(`[data-lang-level="${i}"]`)?.value.trim() || '',
   })).filter(l => l.language || l.level);
 
   updated.experience = Array.from(document.querySelectorAll('[data-exp-title]')).map((el, i) => ({
-    title: el.value.trim(),
+    title: String(el?.value || '').trim(),
     company: document.querySelector(`[data-exp-company="${i}"]`)?.value.trim() || '',
     start: document.querySelector(`[data-exp-start="${i}"]`)?.value.trim() || '',
     end: document.querySelector(`[data-exp-end="${i}"]`)?.value.trim() || '',
@@ -2333,7 +2483,7 @@ async function saveProfileFromForm() {
   })).filter(e => e.title || e.company || e.bullets.length);
 
   updated.education = Array.from(document.querySelectorAll('[data-edu-degree]')).map((el, i) => ({
-    degree: el.value.trim(),
+    degree: String(el?.value || '').trim(),
     institution: document.querySelector(`[data-edu-institution="${i}"]`)?.value.trim() || '',
     start: document.querySelector(`[data-edu-start="${i}"]`)?.value.trim() || '',
     end: document.querySelector(`[data-edu-end="${i}"]`)?.value.trim() || '',
@@ -2341,7 +2491,7 @@ async function saveProfileFromForm() {
   })).filter(e => e.degree || e.institution);
 
   updated.careerGoals = updated.careerGoals || {};
-  updated.careerGoals.targetRoles = split(document.getElementById('profile-target-roles')?.value);
+  updated.careerGoals.targetRoles = split(formFieldValue('profile-target-roles'));
 
   try {
     const result = await API.put('profile', updated);
