@@ -7,186 +7,14 @@
 <meta name="page-type" content="software">
 <meta name="site-kind" content="software">
 <meta name="description" content="Search live jobs, match listings to your profile, track applications, and prepare interviews in one workspace.">
-<meta name="theme-color" content="#050718">
+<meta name="theme-color" content="#f3f1ec">
 <meta property="og:type" content="website">
 <meta property="og:title" content="AI Job Search — career assistant">
 <meta property="og:description" content="Your AI-powered career assistant.">
 <link rel="icon" href="/favicon.ico">
+<script src="/js/device.js"></script>
 <link rel="stylesheet" href="/css/tokens.css">
-<style>
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    min-height:100vh;
-    font-family:"Segoe UI",Inter,system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
-    color:var(--text);
-    background:
-      radial-gradient(circle at 12% 8%,rgba(90,60,220,.28) 0,transparent 42%),
-      radial-gradient(circle at 88% 90%,rgba(20,140,210,.22) 0,transparent 45%),
-      var(--bg);
-    display:flex;align-items:center;justify-content:center;
-    padding:32px;
-  }
-  .shell{
-    width:min(1180px,100%);
-    min-height:730px;
-    display:grid;
-    grid-template-columns:1.08fr .92fr;
-    border-radius:28px;
-    overflow:hidden;
-    box-shadow:0 45px 110px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
-    background:var(--panel);
-  }
-
-  /* ---------- HERO ---------- */
-  .hero{
-    position:relative;
-    padding:42px 44px;
-    display:flex;flex-direction:column;justify-content:space-between;
-    background-image:url("login_page_ref.jpg");
-    background-size:cover;background-position:68% center;
-    isolation:isolate;
-  }
-  .hero::before{
-    content:"";position:absolute;inset:0;z-index:-1;
-    background:
-      linear-gradient(180deg,rgba(5,7,24,.18) 0%,rgba(5,7,24,.10) 32%,rgba(5,7,24,.92) 100%),
-      linear-gradient(90deg,rgba(8,10,34,.72) 0%,rgba(8,10,34,.18) 62%,rgba(8,10,34,.45) 100%);
-  }
-  .hero::after{
-    content:"";position:absolute;inset:0;z-index:-1;
-    background:radial-gradient(circle at 68% 42%,rgba(53,230,255,.16),transparent 45%);
-    mix-blend-mode:screen;
-  }
-  .brand{display:flex;align-items:center;gap:12px}
-  .brand-mark{
-    width:42px;height:42px;flex:0 0 42px;
-    display:grid;place-items:center;
-    border-radius:12px;
-    background:linear-gradient(145deg,rgba(53,230,255,.22),rgba(139,92,246,.28));
-    border:1px solid rgba(120,210,255,.45);
-    box-shadow:0 0 24px rgba(53,230,255,.28),inset 0 0 12px rgba(255,255,255,.08);
-  }
-  .brand-mark svg{width:24px;height:24px}
-  .brand-name{font-size:17px;font-weight:750;letter-spacing:.05em;line-height:1}
-  .brand-sub{font-size:10px;letter-spacing:.32em;color:var(--accent);margin-top:5px;font-weight:600}
-  .hero-body{max-width:520px;margin-top:auto;margin-bottom:34px}
-  .pill{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:7px 13px;border-radius:999px;
-    background:rgba(12,18,52,.6);border:1px solid rgba(120,200,255,.3);
-    backdrop-filter:blur(8px);
-    font-size:11px;letter-spacing:.16em;font-weight:700;color:#bfefff;
-  }
-  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
-  .hero h1{
-    font-size:clamp(34px,4vw,50px);line-height:1.08;letter-spacing:-.02em;
-    margin:20px 0 16px;font-weight:800;
-    text-shadow:0 4px 30px rgba(0,0,0,.5);
-  }
-  .hero h1 span{background:linear-gradient(100deg,var(--accent),var(--accent-3) 60%,var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p{font-size:15px;line-height:1.7;color:#cfd9f5;margin:0;max-width:470px}
-  .features{display:flex;flex-wrap:wrap;gap:10px}
-  .feature{
-    display:flex;align-items:center;gap:9px;
-    padding:10px 14px;border-radius:12px;
-    background:rgba(12,17,47,.55);border:1px solid var(--stroke);
-    backdrop-filter:blur(10px);
-    font-size:12px;color:#d8e2ff;font-weight:600;
-  }
-  .feature svg{width:15px;height:15px;color:var(--accent);flex:0 0 15px}
-
-  /* ---------- FORM ---------- */
-  .form-side{
-    position:relative;
-    padding:56px 56px 46px;
-    background:
-      radial-gradient(circle at 100% 0%,rgba(139,92,246,.16),transparent 45%),
-      radial-gradient(circle at 0% 100%,rgba(53,230,255,.10),transparent 42%),
-      linear-gradient(160deg,var(--panel),var(--bg) 70%);
-    display:flex;align-items:center;justify-content:center;
-    overflow:hidden;
-  }
-  .form-side::before{
-    content:"";position:absolute;inset:0;pointer-events:none;opacity:.25;
-    background-image:linear-gradient(rgba(140,160,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(140,160,255,.09) 1px,transparent 1px);
-    background-size:34px 34px;
-    mask-image:radial-gradient(circle at 80% 20%,#000,transparent 70%);
-  }
-  .form-wrap{position:relative;width:100%;max-width:400px}
-  .eyebrow{font-size:11px;letter-spacing:.26em;font-weight:700;color:var(--accent);margin-bottom:12px}
-  .form-head h2{font-size:31px;line-height:1.15;margin:0 0 9px;font-weight:780;letter-spacing:-.01em}
-  .form-head p{margin:0 0 30px;color:var(--muted);font-size:14px;line-height:1.6}
-  label.field-label{display:block;font-size:12px;font-weight:650;color:#c6d0ef;margin-bottom:8px;letter-spacing:.01em}
-  .label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-  .label-row .field-label{margin-bottom:0}
-  .label-row a{color:var(--accent);text-decoration:none;font-size:12px;font-weight:600}
-  .label-row a:hover{text-decoration:underline}
-  .hidden{display:none !important}
-  .input-wrap{position:relative;margin-bottom:20px}
-  .input-wrap>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#7d8bbd;pointer-events:none}
-  .input-wrap input{
-    width:100%;height:50px;padding:0 44px 0 44px;
-    border-radius:12px;border:1px solid var(--stroke);
-    background:rgba(255,255,255,.045);
-    color:var(--text);font-size:14px;outline:none;
-    transition:border-color .2s,box-shadow .2s,background .2s;
-  }
-  .input-wrap input::placeholder{color:#6f7da8}
-  .input-wrap input:focus{border-color:rgba(53,230,255,.7);background:rgba(53,230,255,.06);box-shadow:0 0 0 4px rgba(53,230,255,.10)}
-  .input-wrap input:-webkit-autofill{-webkit-text-fill-color:var(--text);-webkit-box-shadow:0 0 0 1000px #101736 inset;transition:background-color 9999s}
-  .eye{
-    position:absolute;right:8px;top:50%;transform:translateY(-50%);
-    width:34px;height:34px;border:0;background:transparent;border-radius:8px;
-    color:#8a98c6;cursor:pointer;display:grid;place-items:center;
-  }
-  .eye:hover{background:rgba(255,255,255,.06);color:var(--accent)}
-  .eye svg{width:18px;height:18px;position:static;transform:none}
-  .signup a{color:var(--accent);text-decoration:none;font-size:12px;font-weight:600}
-  .signup a:hover{text-decoration:underline}
-  .lang-hint{font-size:11.5px;color:#7f8cb5;margin:0 0 22px;text-align:center}
-  .lang-hint b{color:#b9c6ea;font-weight:650}
-  .submit{
-    width:100%;height:52px;border:0;border-radius:12px;cursor:pointer;
-    background:linear-gradient(100deg,var(--accent),var(--accent-2) 52%,var(--accent-2) 78%,var(--accent-3));
-    color:#071026;font-size:14px;font-weight:800;letter-spacing:.02em;
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    box-shadow:0 14px 32px rgba(83,120,255,.32);
-    transition:transform .2s,box-shadow .2s,filter .2s;
-  }
-  .submit:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(100,110,255,.45);filter:brightness(1.06)}
-  .submit:active{transform:translateY(0)}
-  .submit:disabled{opacity:.7;cursor:not-allowed;transform:none}
-  .submit svg{width:17px;height:17px}
-  .status{font-size:12.5px;min-height:18px;margin-top:10px;text-align:center;color:var(--muted)}
-  .status.error{color:#ff8fa3}
-  .status.success{color:#6ff0c0}
-  .plan-note{display:flex;align-items:center;justify-content:center;gap:8px;margin:26px 0 0;padding:11px 14px;border-radius:11px;background:rgba(53,230,255,.05);border:1px solid var(--stroke);color:#9fb0d8;font-size:12px}
-  .plan-note svg{width:15px;height:15px;color:var(--accent)}
-  .signup{text-align:center;color:var(--muted);font-size:12.5px;margin:26px 0 0}
-  .safe-note{
-    margin-top:22px;display:flex;align-items:center;justify-content:center;gap:7px;
-    font-size:11px;color:#7785ad;letter-spacing:.02em;
-  }
-  .safe-note svg{width:13px;height:13px;color:#5fd6c9}
-
-  @media(max-width:920px){
-    body{padding:16px}
-    .shell{grid-template-columns:1fr;min-height:0}
-    .hero{min-height:330px;padding:30px}
-    .hero h1{font-size:34px}
-    .form-side{padding:40px 28px}
-  }
-  @media(max-width:480px){
-    .hero{min-height:280px;padding:24px}
-    .hero p{font-size:13px}
-    .features{display:none}
-    .form-side{padding:34px 20px}
-  }
-
-
-</style>
+<link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -291,7 +119,7 @@
       const res = await fetch(API + '/api/auth/register', {method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify({name, email, password:pw.value})});
       const data = await res.json();
       if (!res.ok || !data.ok) { setStatus(data.error || 'Could not create account.', 'error'); }
-      else { setStatus('Account created for ' + email + ' — opening your workspace…', 'success'); window.location.href = '/'; return; }
+      else { setStatus('Account created for ' + email + ' — opening your workspace…', 'success'); window.location.href = '/app'; return; }
     } catch (err) { setStatus('Cannot reach the application server. Make sure the app is running on port 3100.', 'error'); }
     btn.disabled = false; btnText.textContent = 'Create account';
   });
@@ -300,7 +128,7 @@
     try {
       const res = await fetch(API + '/api/auth/me', { credentials: 'include' });
       const data = await res.json();
-      if (data && data.user) window.location.replace('/');
+      if (data && data.user) window.location.replace('/app');
     } catch (e) { /* stay on the register page */ }
   })();
 

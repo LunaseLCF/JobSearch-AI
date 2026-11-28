@@ -1,0 +1,337 @@
+<!doctype html>
+<!-- Landing page for AI Job Search. Built with design-taste-frontend: software / collage hero /
+     linen-harbour palette / Mona Sans + Geist Mono / liquid-type moment. -->
+<html lang="en" data-type="software" data-radius="soft" data-ground="sand" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="site-kind" content="software">
+<title>AI Job Search — a tailored CV for every role</title>
+<meta name="description" content="AI Job Search reads your real experience, tailors a CV to each posting and gets you ready for the interview. Four levels, from free to unlimited.">
+<meta property="og:title" content="AI Job Search — a tailored CV for every role">
+<meta property="og:description" content="Your real experience, matched to the role. Start free.">
+
+<meta name="theme-color" content="#f3f1ec">
+<script src="/js/device.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,400..600&family=Geist+Mono:wght@400..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/layout/demo.css">
+<link rel="stylesheet" href="assets/moments/liquid-type/moment.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+<style>
+:root {
+  --p-bg: #f3f1ec; --p-surface: #e6e2d9; --p-ink: #1d2530; --p-muted: #5a6270;
+  --p-accent: #2c5877; --p-accent-ink: #ffffff; --p-action: #2c5877; --p-action-ink: #ffffff;
+  --p-inv-bg: #1d2530; --p-inv-surface: #29313b; --p-inv-ink: #f3f1ec; --p-inv-muted: #9a9d9f;
+  --p-inv-accent: #f3f1ec; --p-inv-accent-ink: #1d2530; --p-inv-action: #f3f1ec; --p-inv-action-ink: #1d2530;
+  --font-display: "Mona Sans", system-ui, sans-serif;
+  --font-text: "Mona Sans", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 500;
+  --display-tracking: -0.03em;
+  --display-tracking-xl: -0.04em;
+  --display-stretch: 104%;
+  --ly-scale: 0.96;
+}
+/* the lit ground of the hero art: warm paper with one harbour-blue light and fine grain */
+.hero__art { background:
+    radial-gradient(70% 60% at 16% 10%, color-mix(in oklab, var(--p-surface) 80%, white), transparent 70%),
+    radial-gradient(62% 54% at 92% 100%, color-mix(in oklab, var(--p-accent) 24%, var(--p-bg)), transparent 72%),
+    var(--p-bg); }
+.hero__art::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .18; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .3 0 0 0 0 .3 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.hero__art > .ly-piece--note { left: var(--s-6); bottom: var(--s-6); width: 300px; z-index: 2; }
+.hero__proof { font-size: var(--t-small); color: var(--muted); }
+.ly-piece--main .d-row { grid-template-columns: 32px minmax(0, 1fr) 68px; gap: 10px; padding: 7px 2px; }
+.ly-piece--main .d-main { padding-right: var(--ly-cut-room); }
+.ly-piece--main .d-row small { font-size: 12px; }
+.ly-piece--main .d-row b { font-size: 13px; }
+/* keep the mock's rows legible inside the frame: no clipped lines at tablet/phone */
+@media (max-width: 1150px) {
+  .ly-piece--main .d-side { display: none; }
+  .ly-piece--main .d-win__body { grid-template-columns: 1fr; }
+  .hero__art > .ly-piece--note { width: 250px; }
+}
+.d-score { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+.d-score--mid { color: #a8794a; }
+.d-note__line { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; color: #3d4247; border-top: 1px solid rgb(0 0 0 / .06); }
+.d-note__line:first-of-type { border-top: 0; }
+.d-note__line i { width: 18px; height: 18px; border-radius: 50%; flex: none; display: grid; place-items: center; background: #e7f4ec; color: #17673f; font-style: normal; font-size: 13px; font-weight: 700; }
+.d-note__line i.warn { background: #fdf0dc; color: #8a5300; }
+.d-note__line b { font-weight: 500; color: #16181a; }
+/* feature cards */
+.open-cards > .card { grid-column: 1 / -1; }
+@media (min-width: 1024px) { .open-cards > .card { grid-column: auto / span 4; } }
+.open-cards .panel { --p-h: 220px; background:
+    radial-gradient(80% 70% at 20% 0%, color-mix(in oklab, var(--p-surface) 80%, white), transparent 70%),
+    var(--p-bg); }
+.open-cards .d-card { box-shadow: 0 0 0 1px rgb(0 0 0 / .06), 0 14px 32px -18px rgb(0 0 0 / .35); }
+.open-cards .stage > .at-rise { --ax: 20px; --ay: 28px; --fit-max: 300px; }
+@media (max-width: 639px) { .open-cards .panel { --p-h: 150px; } .stage > .at-rise { --ay-sm: 20px; } .open-cards > .card > .panel { margin-top: var(--s-5); } }
+/* statement moment */
+.statement .mo-lt__type { font-size: clamp(48px, 8.2vw, 116px); max-width: 16ch; }
+.why-grid { margin-top: var(--s-8); }
+.why-card { display: flex; flex-direction: column; gap: 10px; }
+.why-index { font: 500 11px/1.4 var(--font-mono); letter-spacing: .08em; color: var(--accent); }
+.why-card h3 { font-size: 20px; letter-spacing: -.025em; }
+.why-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+@media (max-width: 639px) {
+  .why-grid { margin-top: var(--s-6); }
+  .why-card { grid-column: 1 / -1; }
+  .statement .mo-lt__type { font-size: clamp(42px, 12vw, 68px); }
+}
+/* pricing: four levels */
+.plans-grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 480px) {
+  .plans-grid { gap: var(--s-3); grid-template-columns: 1fr; }
+  .plans-grid .plan { padding: var(--s-5); }
+  .plans-grid .plan__price { font-size: 30px; }
+  .plans-grid .plan__list { font-size: 12px; line-height: 17px; gap: 6px; margin-top: 14px; padding-top: 14px; }
+  .plans-grid .plan__for { font-size: 13px; line-height: 18px; min-height: 0; }
+  .plans-grid .plan__name { flex-wrap: wrap; }
+  .plans-grid .plan__price small { white-space: normal; font-size: 11px; }
+  .plans-grid .plan__btn { margin-top: 14px; height: 44px; }
+  .plan__icon { height: 112px; }
+  .plan__icon svg { width: 22px; height: 22px; }
+  #levels, #levels2 { --hm: 2; }
+}
+.plans-grid .plan { min-width: 0; }
+.plans-grid .plan__price { font-size: 36px; letter-spacing: -.03em; }
+.plans-grid .plan__price small { display: block; font: 400 12px/1.3 var(--font-text); color: var(--muted); margin-top: 4px; letter-spacing: 0; }
+.plans-grid .plan__list { font-size: 13px; line-height: 18px; gap: 7px; margin-top: 16px; padding-top: 16px; }
+/* One action, one look: the plan buttons match the nav/footer primary exactly. */
+.plans-grid .plan__btn { background: var(--p-action); color: var(--p-action-ink); box-shadow: none; border-radius: var(--r-btn, 10px); font: 500 14px/1 var(--font-text); }
+.plans-grid .plan__btn:hover { filter: brightness(1.08); }
+/* a real icon per plan so the level cards carry a visual, not just text */
+.plan__icon { display: flex; align-items: center; gap: 12px; height: 120px; padding: 0 16px;
+  border-radius: 10px; background: linear-gradient(100deg, color-mix(in oklab, var(--p-accent) 10%, var(--p-surface)), var(--p-surface));
+  color: var(--p-accent); margin-bottom: 12px; }
+.plan__icon::before { content: ""; width: 3px; height: 32px; border-radius: 2px; background: currentColor; opacity: .5; }
+.plan__icon svg { width: 26px; height: 26px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.plan__icon::after { content: attr(data-quota); font: 500 12px/1 var(--font-mono); color: currentColor; opacity: .75; letter-spacing: .02em; }
+.plan.is-featured .plan__icon { background: linear-gradient(100deg, color-mix(in oklab, var(--p-accent) 22%, var(--p-surface)), color-mix(in oklab, var(--p-accent) 8%, var(--p-surface))); }
+@media (max-width: 639px) { .hero__art > .ly-piece--note { left: var(--s-4); bottom: var(--s-4); width: 250px; } }
+/* keep the toggle inside the container on small phones */
+.nav__item--mobile { display: none; }
+@media (max-width: 1023px) {
+  .nav__item--mobile { display: block; }
+  .nav__actions { display: none !important; }
+}
+@media (max-width: 360px) {
+  .nav__logo { font-size: 16px; gap: 6px; }
+  .nav__logo .mark { display: none; }
+}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap nav__bar">
+    <a class="nav__logo" href="/"><span class="mark" data-mark="wordmark" aria-hidden="true"></span>AI Job Search</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="#how">How it works</a></div>
+      <!--<div class="nav__item"><a class="nav__link" href="#levels">Levels</a></div>
+      <div class="nav__item"><a class="nav__link" href="#why">Why us</a></div> -->
+      <div class="nav__item nav__item--mobile"><a class="nav__link" href="/login">Log in</a></div>
+      <div class="nav__item nav__item--mobile"><a class="nav__link" href="/register">Create free account</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="/login">Log in</a>
+      <a class="btn btn--primary" href="/register">Create free account</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--collage" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <h1 id="hero-h">Job search that tailors your CV.</h1>
+        <p class="hero__lead">AI Job Search reads your real experience, tailors each application to the posting and gets you ready for the interview. Four levels, from 20 free parses a month to unlimited — nothing invented, just your experience said the right way.</p>
+        <div class="btn-row"><a class="btn btn--primary" href="/register">Create free account</a><a class="btn btn--secondary" href="/login">Log in</a></div>
+        <p class="hero__proof">One profile. Every application tailored from it.</p>
+      </div>
+      <div class="hero__art span-6 start-7" role="img" aria-label="AI Job Search matching a profile to three open roles, with a CV tailoring suggestion">
+        <div class="ly-piece ly-piece--main d-win" aria-hidden="true">
+          <div class="d-win__bar"><span class="d-win__dots"><i></i><i></i><i></i></span><span>AI Job Search · Matched roles</span></div>
+          <div class="d-win__body">
+            <div class="d-side">
+              <span class="is-on"><i></i>Matches</span><span><i></i>My profile</span><span><i></i>Tailored CVs</span><span><i></i>Interview prep</span>
+              <span class="d-side__label">Search</span><span><i></i>Remote · Europe</span><span><i></i>Supply chain</span>
+            </div>
+            <div class="d-main">
+              <div class="d-main__head"><h4>Matches for you</h4><span class="d-btn">Refresh</span></div>
+              <div class="d-tabs"><span class="is-on">Top 24</span><span>Saved 6</span><span>Applied 3</span></div>
+              <div class="d-rows">
+                <div class="d-row"><span class="d-thumb" style="background:#dfe6ec"></span><div><b>Supply Chain Lead</b><small>Northline · Berlin</small></div><span class="d-score">94%</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#e9e4d6"></span><div><b>Project Coordinator</b><small>Vela Systems · Remote</small></div><span class="d-score">89%</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#d9c7a6"></span><div><b>Procurement Manager</b><small>ABC Logistics · Amsterdam</small></div><span class="d-score d-score--mid">81%</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#e6dfe9"></span><div><b>Operations Analyst</b><small>Fieldwork · London</small></div><span class="d-score d-score--mid">78%</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#dfe6ec"></span><div><b>Customer Programs</b><small>Meridian · Remote</small></div><span class="d-score d-score--mid">76%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ly-piece ly-piece--note d-card" aria-hidden="true" data-ly-steps="700">
+          <div class="d-card__row"><h5>Tailored CV</h5><span class="d-chip" data-step data-step-at="4">Ready</span></div>
+          <div class="d-note__line" data-step><i>✓</i><span><b>8 skills</b> matched to the posting</span></div>
+          <div class="d-note__line" data-step><i>✓</i><span>Summary rewritten for <b>this role</b></span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="section-head"><h2 id="how-h">From your experience to the offer. <span class="muted">Three things AI Job Search does for every application.</span></h2></div>
+      <div class="grid open-cards">
+        <article class="card card--row">
+          <h3>Read your CV once</h3>
+          <p>Upload a CV. We pull out the roles, skills and dates so you never retype them.</p>
+          <div class="panel panel--inset" role="img" aria-label="A parsed profile with roles, skills and dates extracted from a CV">
+            <div class="stage"><div class="at-rise fit"><div class="d-card d-receipt" aria-hidden="true">
+              <div class="d-card__row"><h5>Profile parsed</h5><span class="d-chip">Done</span></div>
+              <div class="ln"><span><b>Roles</b>, 4 positions</span><em>ok</em></div>
+              <div class="ln"><span><b>Skills</b>, 18 found</span><em>ok</em></div>
+              <div class="ln"><span><b>Dates</b>, complete</span><em>ok</em></div>
+            </div></div></div>
+          </div>
+        </article>
+        <article class="card card--row">
+          <h3>Tailor it to the role</h3>
+          <p>Paste a job ad. We reorder and rephrase what is already true about you — nothing invented.</p>
+          <div class="panel panel--inset" role="img" aria-label="A CV summary rewritten to match a supply chain role">
+            <div class="stage"><div class="at-rise fit"><div class="d-card" aria-hidden="true">
+              <div class="d-card__row"><h5>Supply Chain Lead</h5><span class="d-chip">94% fit</span></div>
+              <p>Summary rewritten for this role.</p>
+              <div class="d-bar" style="--v: 94%"><i></i></div>
+              <div class="d-note__line"><i>✓</i><span>8 skills <b>matched</b> to the posting</span></div>
+            </div></div></div>
+          </div>
+        </article>
+        <article class="card card--row">
+          <h3>Prep for the interview</h3>
+          <p>Practise the questions this role actually asks, with answers grounded in your own profile.</p>
+          <div class="panel panel--inset" role="img" aria-label="An interview prep card with three role-specific questions">
+            <div class="stage"><div class="at-rise fit"><div class="d-card" aria-hidden="true">
+              <div class="d-card__row"><h5>Interview prep</h5><span class="d-chip">3 questions</span></div>
+              <div class="d-note__line"><i>✓</i><span>Tell me about a <b>supplier issue</b></span></div>
+              <div class="d-note__line"><i>✓</i><span>How do you <b>plan a quarter</b>?</span></div>
+              <div class="d-note__line"><i>✓</i><span>Answers from <b>your experience</b></span></div>
+            </div></div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section statement" id="why" data-moment="liquid-type" aria-labelledby="why-h">
+    <div class="wrap">
+      <div class="section-head" style="max-width:none">
+        <p class="section__lead">Your experience, kept intact. Four published levels, three interface languages, and owner-only control of the deployment.</p>
+        <h1 class="mo-lt__type" id="why-h">Less formatting. More interviews.</h1>
+      </div>
+      <div class="grid why-grid">
+        <article class="card why-card span-4">
+          <span class="why-index">01 / YOUR FACTS</span>
+          <h3>Nothing invented</h3>
+          <p>Your CV is parsed once into roles, skills and dates. Every tailored summary and answer is rewritten from what is already true — no fabricated metrics or employers.</p>
+        </article>
+        <article class="card why-card span-4">
+          <span class="why-index">02 / ONE WORKSPACE</span>
+          <h3>From search to interview</h3>
+          <p>Match a posting, tailor the CV, track the application and build interview prep in the same workspace. The interface follows your language: English, ไทย or 中文.</p>
+        </article>
+        <article class="card why-card span-4">
+          <span class="why-index">03 / CLEAR CONTROL</span>
+          <h3>Limits you can see</h3>
+          <p>Four levels with published monthly allowances. LLM configuration, repository browsing and user administration stay with the owner account only.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+<!--
+  <section class="section" id="levels" aria-labelledby="levels-h">
+    <div class="wrap">
+      <div class="section-head"><h2 id="levels-h">Four levels. <span class="muted">Start free; grow when your search does.</span></h2></div>
+      <p class="section__lead">Every new account starts on Pro. Each level raises the monthly limits for parsing, tailoring, interview prep and exports.</p>
+      <div class="plans-grid plans-grid--pair">
+        <article class="card plan">
+          <span class="plan__icon" role="img" aria-label="Document icon" data-quota="20 / MO"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h4"/></svg></span>
+          <div class="plan__name">Free</div>
+          <div class="plan__price">20<small>resume parses / month</small></div>
+          <p class="plan__for">For trying it out on a single application.</p>
+          <a class="plan__btn" href="/register">Start with Free</a>
+          <ul class="plan__list"><li>20 CV parses a month</li><li>Profile and role matching</li><li>No card needed</li><li>AI tailoring: not included</li><li>Interview prep: not included</li></ul>
+        </article>
+        <article class="card plan is-featured" data-glow="edge-glow" data-glow-params='{"radius":20,"width":1.2,"glow":10,"bloom":0.3,"segment":0.3,"speed":400,"idle":0.3,"wash":0,"fill":1}' style="--fx-bg:var(--bg);--fx-surface:var(--card);--fx-accent:var(--accent)">
+          <span class="plan__icon" role="img" aria-label="Star icon" data-quota="500 / MO"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.2 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg></span>
+          <div class="plan__name">Pro <span class="plan__badge">Your starting level</span></div>
+          <div class="plan__price">500<small>resume parses / month</small></div>
+          <p class="plan__for">For an active job search. Every new account begins here.</p>
+          <a class="plan__btn plan__btn--primary" href="/register">Start with Pro</a>
+          <ul class="plan__list"><li>500 CV parses a month</li><li>300 AI tailoring a month</li><li>300 interview preps a month</li><li>500 CV &amp; letter exports</li><li>All role matching</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="levels2" aria-labelledby="levels2-h">
+    <div class="wrap">
+      <div class="section-head"><h2 id="levels2-h">When your search grows. <span class="muted">Higher limits, and the keys to the deployment.</span></h2></div>
+      <div class="plans-grid plans-grid--pair">
+        <article class="card plan">
+          <span class="plan__icon" role="img" aria-label="People icon" data-quota="5,000 / MO"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.5M18 14c1.8.9 3 2.6 3 4.6"/></svg></span>
+          <div class="plan__name">Team</div>
+          <div class="plan__price">5,000<small>resume parses / month</small></div>
+          <p class="plan__for">For a high-volume search or a whole cohort.</p>
+          <a class="plan__btn" href="/register">Start with Team</a>
+          <ul class="plan__list"><li>5,000 CV parses a month</li><li>3,000 AI tailoring a month</li><li>3,000 interview preps a month</li><li>3,000 exports a month</li><li>Everything in Pro</li></ul>
+        </article>
+        <article class="card plan">
+          <span class="plan__icon" role="img" aria-label="Key icon" data-quota="UNLIMITED"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8"/><path d="m17 6 2 2M15 8l2 2"/></svg></span>
+          <div class="plan__name">Owner</div>
+          <div class="plan__price">Unlimited<small>no monthly limits</small></div>
+          <p class="plan__for">For the person running the deployment.</p>
+          <a class="plan__btn" href="/login">Sign in as owner</a>
+          <ul class="plan__list"><li>Unlimited everything</li><li>LLM configuration</li><li>Repository access</li><li>All owner-only features</li><li>Self-hosted deployment</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+-->
+
+</main>
+
+<footer class="footer closing" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head"><h2 id="close-h">Your next role starts with a better CV.</h2></div>
+      <a class="btn btn--primary btn--wide" href="/register">Create free account<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-6 stack-5">
+          <a class="nav__logo" href="/"><span class="mark" data-mark="wordmark" aria-hidden="true"></span>AI Job Search</a>
+          <p class="footer__lede">Your real experience, matched to the role.</p>
+        </div>
+        <div class="span-3 start-7 footer__col"><h4>Account</h4><ul><li><a href="/register">Create account</a></li><li><a href="/login">Log in</a></li><li><a href="/reset-password">Reset password</a></li></ul></div>
+        <div class="span-3 footer__col"><h4>Explore</h4><ul><li><a href="#how">How it works</a></li><li><a href="#levels">Levels</a></li><li><a href="#why">Why us</a></li></ul></div>
+      </div>
+      <div class="footer__legal"><span>&copy; 2026 AI Job Search</span></div>
+    </div>
+  </div>
+</footer>
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+</body>
+</html>

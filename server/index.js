@@ -3860,6 +3860,15 @@ const server = http.createServer((req, res) => {
     return sendFile(res, path.join(ROOT, ROOT_PAGES[pathname]), 'text/html; charset=utf-8');
   }
 
+  // Landing page for visitors; the signed-in app for returning users.
+  // /login and /register redirect to '/', so a session cookie is enough to pick the app.
+  if (pathname === '/') {
+    const landing = path.join(ROOT, 'index.html');
+    if (!auth.getSessionUser(req) && fs.existsSync(landing)) {
+      return sendFile(res, landing, 'text/html; charset=utf-8');
+    }
+  }
+
   // Static files
   let filePath = pathname === '/' ? '/index.html' : pathname;
   const fullPath = path.join(ROOT, 'public', filePath);

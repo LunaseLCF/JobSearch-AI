@@ -6,20 +6,31 @@
   <meta name="page-type" content="software">
   <meta name="site-kind" content="software">
   <meta name="description" content="Search live jobs, match listings to your profile, track applications, and generate tailored CVs and interview prep in one workspace.">
-  <meta name="theme-color" content="#050718">
+  <meta name="theme-color" content="#f3f1ec">
   <meta property="og:type" content="website">
   <meta property="og:title" content="AI Job Search — your career assistant">
   <meta property="og:description" content="Search live jobs, match listings to your profile, track applications, and prepare interviews in one workspace.">
   <title>AI Job Search — career assistant</title>
   <link rel="icon" href="/favicon.ico">
+  <script src="/js/device.js"></script>
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <a class="skip-link" href="#page-content">Skip to main content</a>
   <div id="app">
+    <!-- Mobile top bar (shown automatically on phones and tablets) -->
+    <header class="mobile-topbar">
+      <button class="mobile-menu-btn" type="button" onclick="toggleMobileNav()" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <span class="mobile-brand">AI Job Search</span>
+      <span class="mobile-page" id="mobile-page-label">Dashboard</span>
+    </header>
+    <div class="sidebar-scrim" id="sidebar-scrim" onclick="closeMobileNav()" aria-hidden="true"></div>
+
     <!-- Sidebar -->
-    <nav class="sidebar">
+    <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo">
           <span class="brand-mark" aria-hidden="true">
@@ -30,6 +41,7 @@
           </span>
           <span>AI Job Search</span>
         </div>
+        <button class="mobile-close-btn" type="button" onclick="closeMobileNav()" aria-label="Close navigation">&times;</button>
       </div>
       <ul class="nav-items">
         <li><button class="nav-item active" data-page="dashboard" type="button">
@@ -142,11 +154,11 @@
     </div>
   </div>
 
-  <script src="/js/i18n.js?v=1795756736"></script>
+  <script src="/js/i18n.js?v=1795835804"></script>
   <script>
     // Set the saved language before the app renders its first page.
     if (window.initI18n) initI18n();
   </script>
-  <script src="/js/app.js?v=1795756736"></script>
+  <script src="/js/app.js?v=1795835804"></script>
 </body>
 </html>

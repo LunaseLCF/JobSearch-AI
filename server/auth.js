@@ -11,7 +11,11 @@ const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 const USAGE_FILE = path.join(DATA_DIR, 'usage.json');
 const RESETS_FILE = path.join(DATA_DIR, 'password_resets.json');
 const USER_DATA_ROOT = path.join(DATA_DIR, 'users');
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;      // absolute cookie ceiling
+// sign out after 3 minutes of no activity (overridable for tests via IDLE_SESSION_MS env, in ms)
+const IDLE_SESSION_MS = parseInt(process.env.IDLE_SESSION_MS, 10) > 0
+  ? parseInt(process.env.IDLE_SESSION_MS, 10)
+  : 3 * 60 * 1000;
 const RESET_TTL_MS = 30 * 60 * 1000;
 
 // Login ID counter - persists across restarts
@@ -226,7 +230,13 @@ function createSession(userId) {
   Object.keys(sessions).forEach(key => {
     if (new Date(sessions[key].expiresAt) < new Date()) delete sessions[key];
   });
-  sessions[token] = { userId: safeUserId(userId), createdAt: nowIso(), expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() };
+  const now = Date.now();
+  sessions[token] = {
+    userId: safeUserId(userId),
+    createdAt: new Date(now).toISOString(),
+    lastActivity: new Date(now).toISOString(),
+    expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
+  };
   writeJSON(SESSIONS_FILE, sessions);
   return token;
 }
@@ -322,8 +332,26 @@ function getSessionUser(req) {
   const match = cookie.match(/(?:^|;\s*)sid=([a-f0-9]{64})(?:;|$)/);
   if (!match) return null;
   const sessions = readJSON(SESSIONS_FILE) || {};
-  const session = sessions[match[1]];
-  if (!session || new Date(session.expiresAt) < new Date()) return null;
+  const token = match[1];
+  const session = sessions[token];
+  const now = Date.now();
+  if (!session || new Date(session.expiresAt).getTime() < now) return null;
+
+  // Idle timeout: any authenticated request counts as activity. If the session
+  // has been quiet for longer than the idle window, drop it and require a new login.
+  const last = new Date(session.lastActivity || session.createdAt).getTime();
+  if (now - last >= IDLE_SESSION_MS) {
+    delete sessions[token];
+    writeJSON(SESSIONS_FILE, sessions);
+    return null;
+  }
+
+  // Sliding renewal: extend the idle window on every authenticated request.
+  // Only write when the timestamp actually moves (sessions are persisted to disk).
+  if (now - last > 1000) {
+    session.lastActivity = new Date(now).toISOString();
+    writeJSON(SESSIONS_FILE, sessions);
+  }
   return getUser(session.userId);
 }
 

@@ -1,6 +1,7 @@
 /* AI Job Search - Web Application */
 
 async function apiRequest(path, options = {}) {
+  markActivity();
   const response = await fetch(`/api/${path}`, { credentials: 'same-origin', ...options });
   let data = {};
   try { data = await response.json(); } catch (e) { /* non-JSON error */ }
@@ -39,6 +40,31 @@ let currentPage = 'dashboard';
 let profileData = null;
 let currentUser = null;
 let entitlements = null;
+
+// ---- Idle session timeout: sign out after 3 minutes without activity ----
+const IDLE_LIMIT_MS = 3 * 60 * 1000;
+let lastUserActivity = Date.now();
+let idleTimer = null;
+const IDLE_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll', 'focus'];
+
+function markActivity() {
+  lastUserActivity = Date.now();
+}
+
+function startIdleWatchdog() {
+  IDLE_EVENTS.forEach(evt => window.addEventListener(evt, markActivity, { passive: true }));
+  clearInterval(idleTimer);
+  idleTimer = setInterval(async () => {
+    if (!currentUser) return; // only watch signed-in sessions
+    if (Date.now() - lastUserActivity < IDLE_LIMIT_MS) return;
+    clearInterval(idleTimer);
+    try { await API.post('auth/logout', {}); } catch (e) { /* ignore */ }
+    currentUser = null;
+    entitlements = null;
+    try { sessionStorage.setItem('authNotice', 'You were signed out after 3 minutes of inactivity.'); } catch (e) { /* ignore */ }
+    window.location.assign('/login?reason=idle');
+  }, 5000); // check every 5s; server is the source of truth for the 3-minute window
+}
 
 const PAGE_FEATURES = {
   apply: 'aiTailoring',
@@ -84,6 +110,29 @@ function escapeHtml(value) {
 }
 const esc = escapeHtml;
 
+// ============ Mobile navigation ============
+function toggleMobileNav(force) {
+  const sidebar = document.getElementById('sidebar');
+  const scrim = document.getElementById('sidebar-scrim');
+  const button = document.querySelector('.mobile-menu-btn');
+  if (!sidebar) return;
+  const open = typeof force === 'boolean' ? force : !sidebar.classList.contains('is-open');
+  sidebar.classList.toggle('is-open', open);
+  if (scrim) scrim.classList.toggle('is-open', open);
+  if (button) button.setAttribute('aria-expanded', String(open));
+}
+
+function closeMobileNav() {
+  toggleMobileNav(false);
+}
+
+function updateMobilePageLabel(page) {
+  const label = document.getElementById('mobile-page-label');
+  if (!label) return;
+  const item = document.querySelector(`.nav-item[data-page="${page}"]`);
+  label.textContent = item ? (item.innerText.trim() || page) : page;
+}
+
 // ============ Navigation ============
 document.querySelectorAll('.nav-item').forEach(item => {
   if (item.dataset.external === 'true') return;
@@ -98,6 +147,8 @@ document.querySelectorAll('.nav-item').forEach(item => {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
     currentPage = page;
+    updateMobilePageLabel(page);
+    closeMobileNav();
     renderPage();
   });
 });
@@ -2892,6 +2943,7 @@ function applyAuth(data) {
   entitlements = data.entitlements || null;
   renderAccountPanel();
   applyAccessRules();
+  if (currentUser) startIdleWatchdog();
 }
 
 function renderAccountPanel() {
@@ -2927,6 +2979,7 @@ async function submitAuth(event) {
 }
 
 async function logoutUser() {
+  clearInterval(idleTimer);
   try { await API.post('auth/logout', {}); } catch (e) { /* ignore */ }
   currentUser = null;
   entitlements = null;
@@ -2950,6 +3003,7 @@ async function bootstrapAuth() {
 
 function bootApp() {
   if (window.initI18n) initI18n();
+  updateMobilePageLabel(currentPage);
   renderAuthMode();
   bootstrapAuth();
 }

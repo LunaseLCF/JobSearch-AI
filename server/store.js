@@ -42,7 +42,8 @@ function initStore() {
       token TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       created_at TEXT NOT NULL,
-      expires_at TEXT NOT NULL
+      expires_at TEXT NOT NULL,
+      last_activity TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);
@@ -87,6 +88,12 @@ function initStore() {
       applied_at TEXT NOT NULL
     );
   `);
+
+  // Idle-session support: add last_activity to pre-existing databases.
+  const cols = db.prepare("PRAGMA table_info(sessions)").all();
+  if (!cols.some(c => c.name === 'last_activity')) {
+    db.exec("ALTER TABLE sessions ADD COLUMN last_activity TEXT");
+  }
   return db;
 }
 
@@ -196,7 +203,12 @@ function readSessions() {
   const rows = requireDb().prepare('SELECT * FROM sessions').all();
   const out = {};
   rows.forEach(row => {
-    out[row.token] = { userId: row.user_id, createdAt: row.created_at, expiresAt: row.expires_at };
+    out[row.token] = {
+      userId: row.user_id,
+      createdAt: row.created_at,
+      expiresAt: row.expires_at,
+      lastActivity: row.last_activity || row.created_at,
+    };
   });
   return out;
 }
@@ -204,10 +216,11 @@ function readSessions() {
 function writeSessions(sessions) {
   const dbRef = requireDb();
   const insert = dbRef.prepare(`
-    INSERT INTO sessions (token, user_id, created_at, expires_at)
-    VALUES (@token, @userId, @createdAt, @expiresAt)
+    INSERT INTO sessions (token, user_id, created_at, expires_at, last_activity)
+    VALUES (@token, @userId, @createdAt, @expiresAt, @lastActivity)
     ON CONFLICT(token) DO UPDATE SET
-      user_id = excluded.user_id, created_at = excluded.created_at, expires_at = excluded.expires_at
+      user_id = excluded.user_id, created_at = excluded.created_at, expires_at = excluded.expires_at,
+      last_activity = excluded.last_activity
   `);
   const tx = dbRef.transaction(list => {
     const tokens = Object.keys(list || {});
@@ -222,6 +235,7 @@ function writeSessions(sessions) {
         userId: session.userId,
         createdAt: session.createdAt || nowIso(),
         expiresAt: session.expiresAt || nowIso(),
+        lastActivity: session.lastActivity || session.createdAt || nowIso(),
       });
     });
   });
